@@ -238,8 +238,8 @@ export const listingTypes = [
     listingType: 'nightly-booking',
     label: 'Nightly booking',
     transactionType: {
-      process: 'default-booking',
-      alias: 'default-booking/release-1',
+      process: 'negotiation-process',
+      alias: 'negotiation-process/release-1',
       unitType: 'night',
     },
   },

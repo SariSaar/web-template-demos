@@ -2,6 +2,7 @@ import * as log from '../util/log';
 import { ensureTransaction } from '../util/data';
 import * as purchaseProcess from './transactionProcessPurchase';
 import * as bookingProcess from './transactionProcessBooking';
+import * as negotiationProcess from './transactionProcessNegotiation';
 
 // Supported unit types
 export const ITEM = 'item';
@@ -12,6 +13,7 @@ export const HOUR = 'hour';
 // Then names of supported processes
 export const PURCHASE_PROCESS_NAME = 'default-purchase';
 export const BOOKING_PROCESS_NAME = 'default-booking';
+export const NEGOTIATION_PROCESS_NAME = 'negotiation-process'
 
 /**
  * A process should export:
@@ -37,7 +39,13 @@ const PROCESSES = [
     name: BOOKING_PROCESS_NAME,
     alias: `${BOOKING_PROCESS_NAME}/release-1`,
     process: bookingProcess,
-    unitTypes: [DAY, NIGHT, HOUR],
+    unitTypes: [DAY, HOUR],
+  },
+  {
+    name: NEGOTIATION_PROCESS_NAME,
+    alias: `${NEGOTIATION_PROCESS_NAME}/release-1`,
+    process: bookingProcess,
+    unitTypes: [NIGHT],
   },
 ];
 
