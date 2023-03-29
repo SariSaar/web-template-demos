@@ -33,6 +33,7 @@ import { richText } from '../../util/richText';
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
+import { NEGOTIATION_BOOKING_PROCESS_NAME } from '../../transactions/transaction';
 
 import {
   H4,
@@ -52,6 +53,7 @@ import {
   setInitialValues,
   fetchTimeSlots,
   fetchTransactionLineItems,
+  initiateNegotiation,
 } from './ListingPage.duck';
 
 import {
@@ -62,6 +64,7 @@ import {
   handleContactUser,
   handleSubmitInquiry,
   handleSubmit,
+  handleNegotiate,
 } from './ListingPage.shared';
 import ActionBarMaybe from './ActionBarMaybe';
 import SectionTextMaybe from './SectionTextMaybe';
@@ -108,6 +111,7 @@ export const ListingPageComponent = props => {
     history,
     callSetInitialValues,
     onSendInquiry,
+    onNegotiatePrice,
     onInitializeCardPaymentData,
     config,
     routeConfiguration,
@@ -221,10 +225,20 @@ export const ListingPageComponent = props => {
     onInitializeCardPaymentData,
   });
 
+  const onNegotiate = handleNegotiate({
+    ...commonParams,
+    getListing,
+    onNegotiatePrice
+  })
+
   const handleOrderSubmit = values => {
     const isCurrentlyClosed = currentListing.attributes.state === LISTING_STATE_CLOSED;
+    const isNegotiationListing = currentListing.attributes.publicData.transactionProcessAlias.includes(NEGOTIATION_BOOKING_PROCESS_NAME)
+
     if (isOwnListing || isCurrentlyClosed) {
       window.scrollTo(0, 0);
+    } else if (isNegotiationListing) {
+      onNegotiate(values)
     } else {
       onSubmit(values);
     }
@@ -541,6 +555,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
+  onNegotiatePrice: (listingId, params) => dispatch(initiateNegotiation(listingId, params)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone)),

@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { findNextBoundary, getStartOf, monthIdString } from '../../util/dates';
 import { isTransactionsTransitionInvalidTransition, storableError } from '../../util/errors';
-import { transactionLineItems } from '../../util/api';
+import { transactionLineItems, transitionPrivileged } from '../../util/api';
 import * as log from '../../util/log';
 import {
   updatedEntities,
@@ -566,6 +566,44 @@ export const sendMessage = (txId, message, config) => (dispatch, getState, sdk) 
       throw e;
     });
 };
+
+export const makeOffer = (negotiatedTotal, transaction, transition) => (dispatch, getState, sdk) => {
+  console.log({ negotiatedTotal }, { transaction }, { transition })
+
+  if (transitionInProgress(getState())) {
+    return Promise.reject(new Error('Transition already in progress'));
+  }
+
+  const orderData = {
+    bookingStart: transaction.booking.attributes.start,
+    bookingEnd: transaction.booking.attributes.end,
+    negotiatedTotal,
+  };
+
+
+  const bodyParams = {
+    id: transaction.id,
+    transition,
+    params: { listingId: transaction.listing.id.uuid }
+  };
+
+  const queryParams = {
+    include: ['booking', 'provider'],
+    expand: true,
+  };
+
+  return transitionPrivileged({
+    isSpeculative: false,
+    orderData,
+    bodyParams,
+    queryParams
+  }).then(response => {
+    dispatch(addMarketplaceEntities(response));
+    const entities = denormalisedResponseEntities(response);
+    const order = entities[0];
+    return order;
+  })
+}
 
 // If other party has already sent a review, we need to make transition to
 // transitions.REVIEW_2_BY_<CUSTOMER/PROVIDER>

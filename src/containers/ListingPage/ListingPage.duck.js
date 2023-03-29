@@ -13,6 +13,7 @@ import {
 } from '../../util/urlHelpers';
 import { getProcess, isBookingProcessAlias } from '../../transactions/transaction';
 import { fetchCurrentUser, fetchCurrentUserHasOrdersSuccess } from '../../ducks/user.duck';
+import { initiatePrivileged } from '../../util/api';
 
 const { UUID } = sdkTypes;
 
@@ -328,6 +329,79 @@ export const sendInquiry = (listing, message) => (dispatch, getState, sdk) => {
       dispatch(sendInquiryError(storableError(e)));
       throw e;
     });
+};
+
+
+export const initiateNegotiation = (listing, orderParams) => (dispatch, getState, sdk) => {
+  const { deliveryMethod, quantity, bookingDates, ...otherOrderParams } = orderParams;
+  const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
+  const bookingParamsMaybe = bookingDates || {};
+
+  console.log({ orderParams })
+
+  const listingId = listing.id.uuid;
+
+  // Parameters only for client app's server
+  const orderData = deliveryMethod ? { deliveryMethod } : {};
+
+  // Parameters for Flex API
+  const transitionParams = {
+    listingId,
+    ...quantityMaybe,
+    ...bookingParamsMaybe,
+    ...otherOrderParams,
+  };
+
+  const processAlias = listing?.attributes?.publicData?.transactionProcessAlias;
+
+  if (!processAlias) {
+    const error = new Error('No transaction process attached to listing');
+    log.error(error, 'listing-process-missing', {
+      listingId: listing?.id?.uuid,
+    });
+    // TODO: update request + error etc. dispatches
+    // dispatch(sendInquiryError(storableError(error)));
+    return Promise.reject(error);
+  }
+
+  const [processName, alias] = processAlias.split('/');
+  const transitions = getProcess(processName)?.transitions;
+  console.log({ transitions }, { processName })
+
+  const bodyParams = {
+    transition: transitions.REQUEST,
+    processAlias,
+    params: transitionParams,
+  };
+
+  const queryParams = {
+    include: ['booking', 'provider'],
+    expand: true,
+  };
+
+  console.log({ orderData }, { transitionParams })
+
+  return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+    .then(response => {
+      const entities = denormalisedResponseEntities(response);
+      const order = entities[0];
+      /// TODO update success
+      // dispatch(initiateOrderSuccess(order));
+      dispatch(fetchCurrentUserHasOrdersSuccess(true));
+      return order.id;
+    }).catch(e => {
+      // TODO
+      // dispatch(initiateOrderError(storableError(e)));
+      const transactionIdMaybe = transactionId ? { transactionId: transactionId.uuid } : {};
+      log.error(e, 'initiate-order-failed', {
+        ...transactionIdMaybe,
+        listingId,
+        ...quantityMaybe,
+        ...bookingParamsMaybe,
+        ...orderData,
+      });
+      throw e;
+    })
 };
 
 // Helper function for loadData call.

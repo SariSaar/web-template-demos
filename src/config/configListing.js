@@ -236,7 +236,7 @@ export const listingTypes = [
   // TODO: SearchPage does not work well if both booking and product selling are used at the same time
   {
     listingType: 'nightly-booking',
-    label: 'Nightly booking',
+    label: 'Nightly booking with negotiated price',
     transactionType: {
       process: 'negotiation-process',
       alias: 'negotiation-process/release-1',

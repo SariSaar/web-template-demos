@@ -190,6 +190,7 @@ export const InboxPageComponent = props => {
     pagination,
     params,
     providerNotificationCount,
+    customerNotificationCount,
     scrollingDisabled,
     transactions,
   } = props;
@@ -204,6 +205,8 @@ export const InboxPageComponent = props => {
   const ordersTitle = intl.formatMessage({ id: 'InboxPage.ordersTitle' });
   const salesTitle = intl.formatMessage({ id: 'InboxPage.salesTitle' });
   const title = isOrders ? ordersTitle : salesTitle;
+
+  console.log({ transactions })
 
   const pickType = lt => conf => conf.listingType === lt;
   const findListingTypeConfig = publicData => {
@@ -256,6 +259,9 @@ export const InboxPageComponent = props => {
       text: (
         <span>
           <FormattedMessage id="InboxPage.ordersTabTitle" />
+          {customerNotificationCount > 0 ? (
+            <NotificationBadge count={customerNotificationCount} />
+          ) : null}
         </span>
       ),
       selected: isOrders,
@@ -365,13 +371,18 @@ InboxPageComponent.propTypes = {
 
 const mapStateToProps = state => {
   const { fetchInProgress, fetchOrdersOrSalesError, pagination, transactionRefs } = state.InboxPage;
-  const { currentUser, currentUserNotificationCount: providerNotificationCount } = state.user;
+  const { 
+    currentUser,
+    currentUserNotificationCount: providerNotificationCount,
+    currentUserCustomerNotificationCount: customerNotificationCount,
+  } = state.user;
   return {
     currentUser,
     fetchInProgress,
     fetchOrdersOrSalesError,
     pagination,
     providerNotificationCount,
+    customerNotificationCount,
     scrollingDisabled: isScrollingDisabled(state),
     transactions: getMarketplaceEntities(state, transactionRefs),
   };

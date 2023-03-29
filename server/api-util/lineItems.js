@@ -3,6 +3,7 @@ const {
   calculateQuantityFromHours,
   calculateTotalFromLineItems,
   calculateShippingFee,
+  resolveSuggestedAdjustment,
 } = require('./lineItemHelpers');
 const { types } = require('sharetribe-flex-sdk');
 const { Money } = types;
@@ -170,18 +171,27 @@ exports.transactionLineItems = (listing, orderData) => {
     includeFor: ['customer', 'provider'],
   };
 
+  const suggestedAdjustment = resolveSuggestedAdjustment(order, orderData.negotiatedTotal)
+
+  const suggestedAdjustmentLineItem = suggestedAdjustment ? [{
+    code: 'line-item/suggested-adjustment',
+    quantity: 1,
+    unitPrice: suggestedAdjustment,
+    includeFor: ['customer', 'provider'],
+  }] : [];
+
   // Note: extraLineItems for product selling (aka shipping fee)
   //       is not included to commission calculation.
   const providerCommission = {
     code: 'line-item/provider-commission',
-    unitPrice: calculateTotalFromLineItems([order]),
+    unitPrice: calculateTotalFromLineItems([order, ...suggestedAdjustmentLineItem]),
     percentage: PROVIDER_COMMISSION_PERCENTAGE,
     includeFor: ['provider'],
   };
 
   // Let's keep the base price (order) as first line item and provider's commission as last one.
   // Note: the order matters only if OrderBreakdown component doesn't recognize line-item.
-  const lineItems = [order, ...extraLineItems, providerCommission];
+  const lineItems = [order, ...extraLineItems, ...suggestedAdjustmentLineItem, providerCommission];
 
   return lineItems;
 };

@@ -2,12 +2,14 @@ import { bool, shape, string } from 'prop-types';
 import {
   BOOKING_PROCESS_NAME,
   PURCHASE_PROCESS_NAME,
+  NEGOTIATION_BOOKING_PROCESS_NAME,
   resolveLatestProcessName,
   getProcess,
 } from '../../transactions/transaction';
 
 import { getStateDataForBookingProcess } from './InboxPage.stateDataBooking.js';
 import { getStateDataForPurchaseProcess } from './InboxPage.stateDataPurchase.js';
+import { getStateDataForNegotiationProcess } from './InboxPage.stateDataNegotiation';
 
 export const stateDataShape = shape({
   processName: string.isRequired,
@@ -37,6 +39,9 @@ export const getStateData = params => {
     return getStateDataForPurchaseProcess(params, processInfo());
   } else if (processName === BOOKING_PROCESS_NAME) {
     return getStateDataForBookingProcess(params, processInfo());
+  } else if (processName === NEGOTIATION_BOOKING_PROCESS_NAME) {
+    console.log('negotiation process in inboxpage state data')
+    return getStateDataForNegotiationProcess(params, processInfo())
   } else {
     return {};
   }

@@ -261,3 +261,14 @@ exports.constructValidLineItems = lineItems => {
   });
   return lineItemsWithTotals;
 };
+
+
+// Returns the adjustment as negative if it is a discount, and 
+// positive if it is an extra payment.
+exports.resolveSuggestedAdjustment = (order, negotiatedTotal) => {
+  if (!negotiatedTotal) {
+    return null;
+  }
+  const orderTotalAmount = order.unitPrice.amount * order.quantity;
+  return new Money(negotiatedTotal.amount - orderTotalAmount, negotiatedTotal.currency);
+}

@@ -3,6 +3,7 @@ const { getSdk, getTrustedSdk, handleError, serialize } = require('../api-util/s
 
 module.exports = (req, res) => {
   const { isSpeculative, orderData, bodyParams, queryParams } = req.body;
+  console.log({ orderData  })
 
   const sdk = getSdk(req, res);
   let lineItems = null;
@@ -12,6 +13,7 @@ module.exports = (req, res) => {
     .then(listingResponse => {
       const listing = listingResponse.data.data;
       lineItems = transactionLineItems(listing, { ...orderData, ...bodyParams.params });
+      console.log({ lineItems })
 
       return getTrustedSdk(req);
     })
@@ -26,6 +28,8 @@ module.exports = (req, res) => {
           lineItems,
         },
       };
+
+      console.log({ body }, { queryParams })
 
       if (isSpeculative) {
         return trustedSdk.transactions.initiateSpeculative(body, queryParams);

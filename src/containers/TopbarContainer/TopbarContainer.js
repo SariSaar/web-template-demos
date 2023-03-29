@@ -97,7 +97,8 @@ const mapStateToProps = state => {
     currentUser,
     currentUserHasListings,
     currentUserHasOrders,
-    currentUserNotificationCount: notificationCount,
+    currentUserNotificationCount: providerNotificationCount,
+    currentUserCustomerNotificationCount: customerNotificationCount,
     sendVerificationEmailInProgress,
     sendVerificationEmailError,
   } = state.user;
@@ -107,7 +108,7 @@ const mapStateToProps = state => {
     currentUser,
     currentUserHasListings,
     currentUserHasOrders,
-    notificationCount,
+    notificationCount: providerNotificationCount + customerNotificationCount,
     isAuthenticated,
     authScopes,
     sendVerificationEmailInProgress,

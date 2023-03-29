@@ -38,6 +38,7 @@ import {
   getProcess,
   isBookingProcessAlias,
   resolveLatestProcessName,
+  NEGOTIATION_BOOKING_PROCESS_NAME,
 } from '../../transactions/transaction';
 
 // Import global thunk functions
@@ -394,8 +395,11 @@ export class CheckoutPageComponent extends Component {
       // fnParams should be { listingId, deliveryMethod, quantity?, bookingDates?, paymentMethod?.setupPaymentMethodForSaving?, protectedData }
       const hasPaymentIntents = storedTx.attributes.protectedData?.stripePaymentIntents;
 
-      const requestTransition =
-        storedTx?.attributes?.lastTransition === process.transitions.INQUIRE
+      const isNegotiationTransaction = storedTx?.attributes?.processName === NEGOTIATION_BOOKING_PROCESS_NAME;
+
+      const requestTransition = isNegotiationTransaction 
+          ? process.transitions.PAY
+          : storedTx?.attributes?.lastTransition === process.transitions.INQUIRE
           ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
           : process.transitions.REQUEST_PAYMENT;
       const isPrivileged = process.isPrivileged(requestTransition);

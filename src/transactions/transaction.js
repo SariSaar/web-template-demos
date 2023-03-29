@@ -13,7 +13,7 @@ export const HOUR = 'hour';
 // Then names of supported processes
 export const PURCHASE_PROCESS_NAME = 'default-purchase';
 export const BOOKING_PROCESS_NAME = 'default-booking';
-export const NEGOTIATION_PROCESS_NAME = 'negotiation-process'
+export const NEGOTIATION_BOOKING_PROCESS_NAME = 'negotiation-process'
 
 /**
  * A process should export:
@@ -42,9 +42,9 @@ const PROCESSES = [
     unitTypes: [DAY, HOUR],
   },
   {
-    name: NEGOTIATION_PROCESS_NAME,
-    alias: `${NEGOTIATION_PROCESS_NAME}/release-1`,
-    process: bookingProcess,
+    name: NEGOTIATION_BOOKING_PROCESS_NAME,
+    alias: `${NEGOTIATION_BOOKING_PROCESS_NAME}/release-1`,
+    process: negotiationProcess,
     unitTypes: [NIGHT],
   },
 ];
@@ -265,7 +265,7 @@ export const getAllTransitionsForEveryProcess = () => {
 export const isBookingProcess = processName => {
   const latestProcessName = resolveLatestProcessName(processName);
   const processInfo = PROCESSES.find(process => process.name === latestProcessName);
-  return [BOOKING_PROCESS_NAME].includes(processInfo?.name);
+  return [BOOKING_PROCESS_NAME, NEGOTIATION_BOOKING_PROCESS_NAME].includes(processInfo?.name);
 };
 
 /**
@@ -310,6 +310,28 @@ export const getTransitionsNeedingProviderAttention = () => {
     return [...new Set([...accTransitions, ...processTransitions])];
   }, []);
 };
+
+
+export const getTransitionsNeedingCustomerAttention = () => {
+  return PROCESSES.reduce((accTransitions, processInfo) => {
+    const statesNeedingCustomerAttention = Object.values(
+      processInfo.process.statesNeedingCustomerAttention || []
+    );
+    const process = processInfo.process;
+    const processTransitions = statesNeedingCustomerAttention.reduce(
+      (pickedTransitions, stateName) => {
+        return [...pickedTransitions, ...getTransitionsToState(process, stateName)];
+      },
+      []
+    );
+
+    // Return only unique transitions names
+    // TODO: this setup is subject to problems if one process has important transition named
+    // similarly as unimportant transition in another process.
+    return [...new Set([...accTransitions, ...processTransitions])];
+  }, []);
+};
+
 
 /**
  * Actors

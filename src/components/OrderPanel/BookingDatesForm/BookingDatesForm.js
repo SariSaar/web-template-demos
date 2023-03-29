@@ -3,6 +3,7 @@ import { array, bool, func, number, object, string } from 'prop-types';
 import { compose } from 'redux';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
 import classNames from 'classnames';
+import appSettings from '../../../config/settings';
 
 import { FormattedMessage, intlShape, injectIntl } from '../../../util/reactIntl';
 import { required, bookingDatesRequired, composeValidators } from '../../../util/validators';
@@ -20,9 +21,9 @@ import {
   initialVisibleMonth,
 } from '../../../util/dates';
 import { LINE_ITEM_DAY, LINE_ITEM_NIGHT, TIME_SLOT_TIME, propTypes } from '../../../util/types';
-import { BOOKING_PROCESS_NAME } from '../../../transactions/transaction';
+import { BOOKING_PROCESS_NAME, NEGOTIATION_BOOKING_PROCESS_NAME } from '../../../transactions/transaction';
 
-import { Form, IconArrowHead, PrimaryButton, FieldDateRangeInput, H6 } from '../../../components';
+import { Form, IconArrowHead, PrimaryButton, FieldDateRangeInput, FieldCurrencyInput, H6 } from '../../../components';
 
 import EstimatedCustomerBreakdownMaybe from '../EstimatedCustomerBreakdownMaybe';
 
@@ -374,11 +375,14 @@ const handleFormSpyChange = (
   const { startDate, endDate } =
     formValues.values && formValues.values.bookingDates ? formValues.values.bookingDates : {};
 
+  const { negotiatedTotal } = formValues.values; 
+
   if (startDate && endDate && !fetchLineItemsInProgress) {
     onFetchTransactionLineItems({
       orderData: {
         bookingStart: startDate,
         bookingEnd: endDate,
+        negotiatedTotal,
       },
       listingId,
       isOwnListing,
@@ -430,6 +434,7 @@ export const BookingDatesFormComponent = props => {
     className,
     price: unitPrice,
     listingId,
+    transactionProcessAlias, 
     isOwnListing,
     fetchLineItemsInProgress,
     onFetchTransactionLineItems,
@@ -437,9 +442,22 @@ export const BookingDatesFormComponent = props => {
     timeZone,
     dayCountAvailableForBooking,
     marketplaceName,
+    marketplaceCurrency,
     ...rest
   } = props;
   const classes = classNames(rootClassName || css.root, className);
+
+  const currencyConfig = appSettings.getCurrencyFormatting(marketplaceCurrency);
+
+  const negotiatedTotalInputMaybe = transactionProcessAlias.includes(NEGOTIATION_BOOKING_PROCESS_NAME) ? (
+    <FieldCurrencyInput
+      name="negotiatedTotal"
+      id="negotiatedTotal"
+      currencyConfig={currencyConfig}
+      label="Suggested total price"
+      placeholder="Suggest a total price..."
+    />
+  ) : null;
 
   const onFormSubmit = handleFormSubmit(setFocusedInput, onSubmit);
   const onFocusedInputChange = handleFocusedInputChange(setFocusedInput);
@@ -609,6 +627,8 @@ export const BookingDatesFormComponent = props => {
                 setCurrentMonth(getStartOf(event?.startDate ?? startOfToday, 'month', timeZone))
               }
             />
+
+            {negotiatedTotalInputMaybe}
 
             {showEstimatedBreakdown ? (
               <div className={css.priceBreakdownContainer}>

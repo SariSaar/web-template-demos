@@ -125,6 +125,20 @@ export const handleSubmitInquiry = parameters => values => {
     });
 };
 
+export const handleNegotiate = parameters => values => {
+  const { history, params, getListing, onNegotiatePrice, routes } = parameters;
+  const listingId = new UUID(params.id);
+  const listing = getListing(listingId);
+  // Construct the correct order params
+  const orderData = compileOrderData(values);
+  // Dispatch onNegotiatePrice with order params
+  onNegotiatePrice(listing, orderData)
+  .then(txId => {
+    // Redirect to OrderDetailsPage
+    history.push(createResourceLocatorString('OrderDetailsPage', routes, { id: txId.uuid }, {}));
+  })
+}
+
 /**
  * Handle order submit from OrderPanel.
  *
@@ -143,44 +157,11 @@ export const handleSubmit = parameters => values => {
   const listingId = new UUID(params.id);
   const listing = getListing(listingId);
 
-  const {
-    bookingDates,
-    bookingStartTime,
-    bookingEndTime,
-    bookingStartDate, // not relevant (omit)
-    bookingEndDate, // not relevant (omit)
-    quantity: quantityRaw,
-    deliveryMethod,
-    ...otherOrderData
-  } = values;
-
-  const bookingMaybe = bookingDates
-    ? {
-        bookingDates: {
-          bookingStart: bookingDates.startDate,
-          bookingEnd: bookingDates.endDate,
-        },
-      }
-    : bookingStartTime && bookingEndTime
-    ? {
-        bookingDates: {
-          bookingStart: timestampToDate(bookingStartTime),
-          bookingEnd: timestampToDate(bookingEndTime),
-        },
-      }
-    : {};
-  const quantity = Number.parseInt(quantityRaw, 10);
-  const quantityMaybe = Number.isInteger(quantity) ? { quantity } : {};
-  const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
+  const orderData = compileOrderData(values);
 
   const initialValues = {
     listing,
-    orderData: {
-      ...bookingMaybe,
-      ...quantityMaybe,
-      ...deliveryMethodMaybe,
-      ...otherOrderData,
-    },
+    orderData,
     confirmPaymentError: null,
   };
 
@@ -204,6 +185,39 @@ export const handleSubmit = parameters => values => {
     )
   );
 };
+
+const compileOrderData = (values) => {
+  const {
+    bookingDates, bookingStartTime, bookingEndTime, quantity: quantityRaw, deliveryMethod, ...otherOrderData
+  } = values;
+
+  const bookingMaybe = bookingDates
+    ? {
+      bookingDates: {
+        bookingStart: bookingDates.startDate,
+        bookingEnd: bookingDates.endDate,
+      },
+    }
+    : bookingStartTime && bookingEndTime
+      ? {
+        bookingDates: {
+          bookingStart: timestampToDate(bookingStartTime),
+          bookingEnd: timestampToDate(bookingEndTime),
+        },
+      }
+      : {};
+  const quantity = Number.parseInt(quantityRaw, 10);
+  const quantityMaybe = Number.isInteger(quantity) ? { quantity } : {};
+  const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
+
+  const orderData = {
+    ...bookingMaybe,
+    ...quantityMaybe,
+    ...deliveryMethodMaybe,
+    ...otherOrderData,
+  };
+  return orderData;
+}
 
 /**
  * Create fallback views for the ListingPage: LoadingPage and ErrorPage.

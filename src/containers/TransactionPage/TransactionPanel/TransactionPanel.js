@@ -23,6 +23,7 @@ import FeedSection from './FeedSection';
 import ActionButtonsMaybe from './ActionButtonsMaybe';
 import DiminishedActionButtonMaybe from './DiminishedActionButtonMaybe';
 import PanelHeading from './PanelHeading';
+import NegotiateForm from './NegotiateForm';
 
 import css from './TransactionPanel.module.css';
 
@@ -132,6 +133,7 @@ export class TransactionPanelComponent extends Component {
       sendMessageError,
       onOpenDisputeModal,
       intl,
+      onNegotiate,
       stateData,
       showBookingLocation,
       activityFeed,
@@ -172,6 +174,14 @@ export class TransactionPanelComponent extends Component {
         isProvider={isProvider}
       />
     );
+
+    const negotiationForm = (
+      <NegotiateForm
+        showNegotiate={stateData.showNegotiationButton}
+        onSubmit={(values) => onNegotiate(values, stateData.negotiationTransition)}
+        config={config}
+      />
+    )
 
     const showSendMessageForm =
       !isCustomerBanned && !isCustomerDeleted && !isProviderBanned && !isProviderDeleted;
@@ -324,7 +334,10 @@ export class TransactionPanelComponent extends Component {
                 />
 
                 {stateData.showActionButtons ? (
-                  <div className={css.desktopActionButtons}>{actionButtons}</div>
+                  <div>
+                    <div className={css.desktopActionButtons}>{negotiationForm}</div>
+                    <div className={css.desktopActionButtons}>{actionButtons}</div>
+                  </div>
                 ) : null}
               </div>
               <DiminishedActionButtonMaybe

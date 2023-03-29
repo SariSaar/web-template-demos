@@ -251,6 +251,7 @@ const OrderPanel = props => {
             lineItems={lineItems}
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
+            transactionProcessAlias={transactionProcessAlias}
           />
         ) : showProductOrderForm ? (
           <ProductOrderForm

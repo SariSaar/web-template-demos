@@ -59,6 +59,7 @@ import {
   fetchMoreMessages,
   fetchTimeSlots,
   fetchTransactionLineItems,
+  makeOffer,
 } from './TransactionPage.duck';
 import css from './TransactionPage.module.css';
 
@@ -125,6 +126,7 @@ export const TransactionPageComponent = props => {
     lineItems,
     fetchLineItemsInProgress,
     fetchLineItemsError,
+    onNegotiate,
   } = props;
 
   const { listing, provider, customer, booking } = transaction || {};
@@ -188,6 +190,11 @@ export const TransactionPageComponent = props => {
     };
 
     redirectToCheckoutPageWithInitialValues(initialValues, listing);
+  }
+
+  const handleNegotiate = (values, transition) => {
+    const { negotiatedTotal } = values;
+    onNegotiate(negotiatedTotal, transaction, transition)
   }
 
   // Customer can create a booking, if the tx is in "inquiry" state.
@@ -450,6 +457,7 @@ export const TransactionPageComponent = props => {
         />
       }
       config={config}
+      onNegotiate={handleNegotiate}
       {...orderBreakdownMaybe}
       orderPanel={
         <OrderPanel
@@ -664,6 +672,7 @@ const mapDispatchToProps = dispatch => {
       dispatch(manageDisableScrolling(componentId, disableScrolling)),
     onSendReview: (tx, transitionOptions, params, config) =>
       dispatch(sendReview(tx, transitionOptions, params, config)),
+    onNegotiate: (negotiatedTotal, transaction, isProviderRole) => dispatch(makeOffer(negotiatedTotal, transaction, isProviderRole)),
     callSetInitialValues: (setInitialValues, values) => dispatch(setInitialValues(values)),
     onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
     onFetchTransactionLineItems: (orderData, listingId, isOwnListing) =>

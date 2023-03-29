@@ -2,7 +2,7 @@ import { denormalisedResponseEntities, ensureOwnListing } from '../util/data';
 import { storableError } from '../util/errors';
 import { LISTING_STATE_DRAFT } from '../util/types';
 import * as log from '../util/log';
-import { getTransitionsNeedingProviderAttention } from '../transactions/transaction';
+import { getTransitionsNeedingProviderAttention, getTransitionsNeedingCustomerAttention } from '../transactions/transaction';
 
 import { authInfo } from './auth.duck';
 import { stripeAccountCreateSuccess } from './stripeConnectAccount.duck';
@@ -62,6 +62,7 @@ const initialState = {
   currentUserHasListings: false,
   currentUserHasListingsError: null,
   currentUserNotificationCount: 0,
+  currentUserCustomerNotificationCount: 0,
   currentUserNotificationCountError: null,
   currentUserHasOrders: null, // This is not fetched unless unverified emails exist
   currentUserHasOrdersError: null,
@@ -103,7 +104,11 @@ export default function reducer(state = initialState, action = {}) {
     case FETCH_CURRENT_USER_NOTIFICATIONS_REQUEST:
       return { ...state, currentUserNotificationCountError: null };
     case FETCH_CURRENT_USER_NOTIFICATIONS_SUCCESS:
-      return { ...state, currentUserNotificationCount: payload.transactions.length };
+      return { 
+        ...state,
+        currentUserNotificationCount: payload.providerData.length,
+        currentUserCustomerNotificationCount: payload.customerData.length,
+      };
     case FETCH_CURRENT_USER_NOTIFICATIONS_ERROR:
       console.error(payload); // eslint-disable-line
       return { ...state, currentUserNotificationCountError: payload };
@@ -191,9 +196,9 @@ const fetchCurrentUserNotificationsRequest = () => ({
   type: FETCH_CURRENT_USER_NOTIFICATIONS_REQUEST,
 });
 
-export const fetchCurrentUserNotificationsSuccess = transactions => ({
+export const fetchCurrentUserNotificationsSuccess = (providerData, customerData) => ({
   type: FETCH_CURRENT_USER_NOTIFICATIONS_SUCCESS,
-  payload: { transactions },
+  payload: { providerData, customerData },
 });
 
 const fetchCurrentUserNotificationsError = e => ({
@@ -290,24 +295,38 @@ const NOTIFICATION_PAGE_SIZE = 100;
 
 export const fetchCurrentUserNotifications = () => (dispatch, getState, sdk) => {
   const transitionsNeedingAttention = getTransitionsNeedingProviderAttention();
-  if (transitionsNeedingAttention.length === 0) {
+  const transitionsNeedingProviderAttention = getTransitionsNeedingProviderAttention();
+  const transitionsNeedingCustomerAttention = getTransitionsNeedingCustomerAttention();
+  if (transitionsNeedingProviderAttention.concat(transitionsNeedingCustomerAttention).length === 0) {
     // Don't update state, if there's no need to draw user's attention after last transitions.
     return;
   }
 
-  const apiQueryParams = {
+  const providerApiQueryParams = {
     only: 'sale',
-    last_transitions: transitionsNeedingAttention,
+    last_transitions: transitionsNeedingProviderAttention,
+    page: 1,
+    per_page: NOTIFICATION_PAGE_SIZE,
+  };
+
+  const customerApiQueryParams = {
+    only: 'order',
+    last_transitions: transitionsNeedingCustomerAttention,
     page: 1,
     perPage: NOTIFICATION_PAGE_SIZE,
   };
 
   dispatch(fetchCurrentUserNotificationsRequest());
-  sdk.transactions
-    .query(apiQueryParams)
-    .then(response => {
-      const transactions = response.data.data;
-      dispatch(fetchCurrentUserNotificationsSuccess(transactions));
+  Promise.all([
+    sdk.transactions.query(providerApiQueryParams),
+    sdk.transactions.query(customerApiQueryParams),
+    ]
+  ).then(response => {
+    const [
+      { data: { data: providerData }},
+      { data: { data: customerData}}
+    ] = response;
+      dispatch(fetchCurrentUserNotificationsSuccess(providerData, customerData));
     })
     .catch(e => dispatch(fetchCurrentUserNotificationsError(storableError(e))));
 };
