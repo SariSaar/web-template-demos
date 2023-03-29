@@ -34,9 +34,11 @@ Once the transaction price has been accepted, redirect the customer to _Checkout
 
 ## 5. Calculate line items with the suggested total price
 	
-You will also need to modify the line item calculation used for the transaction. You can, for instance, create a line item `suggested-adjustment` that reduces the total to the suggested number. For instance, if the default transaction total would be $250 and the suggested total is $200, the `suggested-adjustment` line item would have quantity 1 and unitPrice -$50.
+You will also need to modify the line item calculation used for the transaction. You will need to create a line item `suggested-adjustment` that reduces the total to the suggested number. The transaction process email templates expect a line item with code `line-item/suggested-adjustment`, so if your line item code is different, you will need to update the email templates as well. 
 
-```
+For instance, if the default transaction total would be $250 and the suggested total is $200, the `suggested-adjustment` line item would have quantity 1 and unitPrice -$50.
+
+```js
 // Returns the adjustment as negative if it is a discount, and 
 // positive if it is an extra payment.
 exports.resolveSuggestedAdjustment = (order, negotiatedTotal) => {
@@ -48,7 +50,7 @@ exports.resolveSuggestedAdjustment = (order, negotiatedTotal) => {
 }
 ```
 
-```
+```js
   const suggestedAdjustment = resolveSuggestedAdjustment(order, orderData.negotiatedTotal)
 
   const suggestedAdjustmentLineItem = suggestedAdjustment ? [{
