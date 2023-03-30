@@ -382,9 +382,13 @@ class EditListingWizard extends Component {
     // the listing is considered deprecated and we don't allow user to modify the listing anymore.
     // Instead, operator should do that through Console or Integration API.
     const existingListingType = currentListing.attributes?.publicData?.listingType;
+    console.log({ listingConfig: config.listing })
+    console.log({ existingListingType }, { ...config.listing.listingTypes })
     const invalidExistingListingType =
       existingListingType &&
       !config.listing.listingTypes.find(config => config.listingType === existingListingType);
+
+    console.log({ invalidExistingListingType })
 
     const tabs = invalidExistingListingType
       ? TABS_DETAILS_ONLY

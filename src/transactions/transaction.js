@@ -2,6 +2,7 @@ import * as log from '../util/log';
 import { ensureTransaction } from '../util/data';
 import * as purchaseProcess from './transactionProcessPurchase';
 import * as bookingProcess from './transactionProcessBooking';
+import * as offSessionProcess from './transactionProcessOffSession';
 
 // Supported unit types
 export const ITEM = 'item';
@@ -12,6 +13,7 @@ export const HOUR = 'hour';
 // Then names of supported processes
 export const PURCHASE_PROCESS_NAME = 'default-purchase';
 export const BOOKING_PROCESS_NAME = 'default-booking';
+export const OFF_SESSION_PROCESS_NAME = 'automatic-off-session-payment';
 
 /**
  * A process should export:
@@ -37,6 +39,12 @@ const PROCESSES = [
     name: BOOKING_PROCESS_NAME,
     alias: `${BOOKING_PROCESS_NAME}/release-1`,
     process: bookingProcess,
+    unitTypes: [DAY, NIGHT, HOUR],
+  },
+  {
+    name: OFF_SESSION_PROCESS_NAME,
+    alias: `${OFF_SESSION_PROCESS_NAME}/release-1`,
+    process: offSessionProcess,
     unitTypes: [DAY, NIGHT, HOUR],
   },
 ];
@@ -257,7 +265,7 @@ export const getAllTransitionsForEveryProcess = () => {
 export const isBookingProcess = processName => {
   const latestProcessName = resolveLatestProcessName(processName);
   const processInfo = PROCESSES.find(process => process.name === latestProcessName);
-  return [BOOKING_PROCESS_NAME].includes(processInfo?.name);
+  return [BOOKING_PROCESS_NAME, OFF_SESSION_PROCESS_NAME].includes(processInfo?.name);
 };
 
 /**
@@ -291,6 +299,28 @@ export const getTransitionsNeedingProviderAttention = () => {
     );
     const process = processInfo.process;
     const processTransitions = statesNeedingProviderAttention.reduce(
+      (pickedTransitions, stateName) => {
+        return [...pickedTransitions, ...getTransitionsToState(process, stateName)];
+      },
+      []
+    );
+    // Return only unique transitions names
+    // TODO: this setup is subject to problems if one process has important transition named
+    // similarly as unimportant transition in another process.
+    return [...new Set([...accTransitions, ...processTransitions])];
+  }, []);
+};
+
+/**
+ * Get transitions that need customer's attention for every supported process
+ */
+export const getTransitionsNeedingCustomerAttention = () => {
+  return PROCESSES.reduce((accTransitions, processInfo) => {
+    const statesNeedingCustomerAttention = Object.values(
+      processInfo.process.statesNeedingCustomerAttention || {}
+    );
+    const process = processInfo.process;
+    const processTransitions = statesNeedingCustomerAttention.reduce(
       (pickedTransitions, stateName) => {
         return [...pickedTransitions, ...getTransitionsToState(process, stateName)];
       },

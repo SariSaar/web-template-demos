@@ -3,7 +3,7 @@ import pick from 'lodash/pick';
 import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
-import { transactionLineItems } from '../../util/api';
+import { initiatePrivileged, transactionLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
 import { findNextBoundary, getStartOf, monthIdString } from '../../util/dates';
@@ -13,6 +13,7 @@ import {
 } from '../../util/urlHelpers';
 import { getProcess, isBookingProcessAlias } from '../../transactions/transaction';
 import { fetchCurrentUser, fetchCurrentUserHasOrdersSuccess } from '../../ducks/user.duck';
+import { initiateOrderSuccess } from '../CheckoutPage/CheckoutPage.duck';
 
 const { UUID } = sdkTypes;
 
@@ -357,6 +358,36 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
   return Promise.all([]);
 };
 
+export const initiateOffSessionOrder = ({ orderData, listing }) => (dispatch, getState, sdk) => {
+  console.log({ orderData }, { listing });
+  const { id, attributes: {  publicData } } = listing;
+
+  const transitions = getTransitions(publicData.transactionProcessAlias);
+  const { bookingDates } = orderData;
+
+  const bodyParams = {
+    transition: transitions.REQUEST_BOOKING,
+    processAlias: publicData.transactionProcessAlias,
+    params: {
+      listingId: id.uuid,
+      ...bookingDates
+    }
+  }
+
+  const queryParams = {
+    include: ['booking', 'provider'],
+    expand: true,
+  };
+
+  return initiatePrivileged({isSpeculated: false, orderData, bodyParams, queryParams}).then(resp => {
+    const entities = denormalisedResponseEntities(resp);
+    const order = entities[0];
+    dispatch(initiateOrderSuccess(order));
+    dispatch(fetchCurrentUserHasOrdersSuccess(true));
+    return order.id;
+  })
+}
+
 export const fetchTransactionLineItems = ({ orderData, listingId, isOwnListing }) => dispatch => {
   dispatch(fetchLineItemsRequest());
   transactionLineItems({ orderData, listingId, isOwnListing })
@@ -399,3 +430,9 @@ export const loadData = (params, search, config) => dispatch => {
     return response;
   });
 };
+
+const getTransitions = (processAlias) => {
+  const [processName, alias] = processAlias.split('/');
+  const transitions = getProcess(processName)?.transitions;
+  return transitions;
+}

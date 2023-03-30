@@ -33,6 +33,7 @@ import { richText } from '../../util/richText';
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
+import { OFF_SESSION_PROCESS_NAME } from '../../transactions/transaction';
 
 import {
   H4,
@@ -52,6 +53,7 @@ import {
   setInitialValues,
   fetchTimeSlots,
   fetchTransactionLineItems,
+  initiateOffSessionOrder,
 } from './ListingPage.duck';
 
 import {
@@ -62,6 +64,7 @@ import {
   handleContactUser,
   handleSubmitInquiry,
   handleSubmit,
+  handleSubmitOffSession,
 } from './ListingPage.shared';
 import ActionBarMaybe from './ActionBarMaybe';
 import SectionTextMaybe from './SectionTextMaybe';
@@ -111,6 +114,7 @@ export const ListingPageComponent = props => {
     onInitializeCardPaymentData,
     config,
     routeConfiguration,
+    onInitiateOffSessionOrder,
   } = props;
 
   // prop override makes testing a bit easier
@@ -221,10 +225,21 @@ export const ListingPageComponent = props => {
     onInitializeCardPaymentData,
   });
 
+  const onSubmitOffSession = handleSubmitOffSession({
+    ...commonParams,
+    currentUser,
+    getListing,
+    onInitiateOffSessionOrder,
+  });
+
   const handleOrderSubmit = values => {
     const isCurrentlyClosed = currentListing.attributes.state === LISTING_STATE_CLOSED;
+    const isOffSessionListing = currentListing.attributes?.publicData?.transactionProcessAlias.includes(OFF_SESSION_PROCESS_NAME)
+
     if (isOwnListing || isCurrentlyClosed) {
       window.scrollTo(0, 0);
+    } else if (isOffSessionListing) {
+      onSubmitOffSession(values)
     } else {
       onSubmit(values);
     }
@@ -540,6 +555,7 @@ const mapDispatchToProps = dispatch => ({
   callSetInitialValues: (setInitialValues, values, saveToSessionStorage) =>
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
+  onInitiateOffSessionOrder: (orderParams, processAlias) => dispatch(initiateOffSessionOrder(orderParams, processAlias)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone) =>

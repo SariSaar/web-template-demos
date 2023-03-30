@@ -38,6 +38,7 @@ import {
   getProcess,
   isBookingProcessAlias,
   resolveLatestProcessName,
+  OFF_SESSION_PROCESS_NAME,
 } from '../../transactions/transaction';
 
 // Import global thunk functions
@@ -245,8 +246,7 @@ export class CheckoutPageComponent extends Component {
     this.onStripeInitialized = this.onStripeInitialized.bind(this);
     this.loadInitialData = this.loadInitialData.bind(this);
     this.handlePaymentIntent = this.handlePaymentIntent.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+    this.handleSubmit = this.handleSubmit.bind(this);  }
 
   componentDidMount() {
     if (window) {
@@ -319,10 +319,8 @@ export class CheckoutPageComponent extends Component {
       const processAlias = pageData.listing.attributes.publicData?.transactionProcessAlias;
       const transactionId = tx ? tx.id : null;
 
-      const requestTransition =
-        tx?.attributes?.lastTransition === process.transitions.INQUIRE
-          ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
-          : process.transitions.REQUEST_PAYMENT;
+      const requestTransition = this.resolveRequestTransition(storedTx, process, pageData.listing)
+      console.log({ requestTransition })
       const isPrivileged = process.isPrivileged(requestTransition);
 
       // Fetch speculated transaction for showing price in order breakdown
@@ -394,10 +392,7 @@ export class CheckoutPageComponent extends Component {
       // fnParams should be { listingId, deliveryMethod, quantity?, bookingDates?, paymentMethod?.setupPaymentMethodForSaving?, protectedData }
       const hasPaymentIntents = storedTx.attributes.protectedData?.stripePaymentIntents;
 
-      const requestTransition =
-        storedTx?.attributes?.lastTransition === process.transitions.INQUIRE
-          ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
-          : process.transitions.REQUEST_PAYMENT;
+      const requestTransition = this.resolveRequestTransition(storedTx, process, pageData.listing);
       const isPrivileged = process.isPrivileged(requestTransition);
 
       // If paymentIntent exists, order has been initiated previously.
@@ -546,6 +541,19 @@ export class CheckoutPageComponent extends Component {
 
     return handlePaymentIntentCreation(orderParams);
   }
+
+  resolveRequestTransition(tx, process, listing) {
+    const isOffSessionProcess = listing?.attributes?.publicData?.transactionProcessAlias.includes(OFF_SESSION_PROCESS_NAME);
+
+    if (isOffSessionProcess) {
+      return process.transitions.INITIATE_PAYMENT;
+    } else {
+      return tx?.attributes?.lastTransition === process.transitions.INQUIRE
+      ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
+      : process.transitions.REQUEST_PAYMENT; 
+    }
+  }
+
 
   handleSubmit(values, process) {
     if (this.state.submitting) {

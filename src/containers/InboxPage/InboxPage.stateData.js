@@ -2,12 +2,14 @@ import { bool, shape, string } from 'prop-types';
 import {
   BOOKING_PROCESS_NAME,
   PURCHASE_PROCESS_NAME,
+  OFF_SESSION_PROCESS_NAME,
   resolveLatestProcessName,
   getProcess,
 } from '../../transactions/transaction';
 
 import { getStateDataForBookingProcess } from './InboxPage.stateDataBooking.js';
 import { getStateDataForPurchaseProcess } from './InboxPage.stateDataPurchase.js';
+import { getStateDataForOffSessionProcess } from './InboxPage.stateDataOffSession.js';
 
 export const stateDataShape = shape({
   processName: string.isRequired,
@@ -37,6 +39,8 @@ export const getStateData = params => {
     return getStateDataForPurchaseProcess(params, processInfo());
   } else if (processName === BOOKING_PROCESS_NAME) {
     return getStateDataForBookingProcess(params, processInfo());
+  } else if (processName === OFF_SESSION_PROCESS_NAME) {
+    return getStateDataForOffSessionProcess(params, processInfo());
   } else {
     return {};
   }

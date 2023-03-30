@@ -97,11 +97,13 @@ const mapStateToProps = state => {
     currentUser,
     currentUserHasListings,
     currentUserHasOrders,
-    currentUserNotificationCount: notificationCount,
+    currentUserNotificationCount: providerNotificationCount,
+    currentUserCustomerNotificationCount: customerNotificationCount,
     sendVerificationEmailInProgress,
     sendVerificationEmailError,
   } = state.user;
   const hasGenericError = !!(logoutError || hasCurrentUserErrors(state));
+  const notificationCount = providerNotificationCount + customerNotificationCount;
   return {
     authInProgress: authenticationInProgress(state),
     currentUser,

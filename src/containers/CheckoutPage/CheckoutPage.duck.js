@@ -106,12 +106,12 @@ export const setInitialValues = initialValues => ({
 
 const initiateOrderRequest = () => ({ type: INITIATE_ORDER_REQUEST });
 
-const initiateOrderSuccess = order => ({
+export const initiateOrderSuccess = order => ({
   type: INITIATE_ORDER_SUCCESS,
   payload: order,
 });
 
-const initiateOrderError = e => ({
+export const initiateOrderError = e => ({
   type: INITIATE_ORDER_ERROR,
   error: true,
   payload: e,

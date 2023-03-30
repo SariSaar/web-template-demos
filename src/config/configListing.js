@@ -243,6 +243,24 @@ export const listingTypes = [
       unitType: 'night',
     },
   },
+  // {
+  //   listingType: 'off-session-payment',
+  //   label: 'Long-term booking paid before booking time',
+  //   transactionType: {
+  //     process: 'automatic-off-session-payment',
+  //     alias: 'automatic-off-session-payment/release-1',
+  //     unitType: 'day',
+  //   },
+  // },
+  {
+    listingType: 'off-session-payment',
+    label: 'Long-term booking paid before booking time',
+    transactionType: {
+      process: 'automatic-off-session-payment',
+      alias: 'automatic-off-session-payment/release-1',
+      unitType: 'day',
+    },
+  },
   {
     listingType: 'hourly-booking',
     label: 'Hourly booking',

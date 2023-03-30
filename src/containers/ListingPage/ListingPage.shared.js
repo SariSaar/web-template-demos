@@ -143,44 +143,11 @@ export const handleSubmit = parameters => values => {
   const listingId = new UUID(params.id);
   const listing = getListing(listingId);
 
-  const {
-    bookingDates,
-    bookingStartTime,
-    bookingEndTime,
-    bookingStartDate, // not relevant (omit)
-    bookingEndDate, // not relevant (omit)
-    quantity: quantityRaw,
-    deliveryMethod,
-    ...otherOrderData
-  } = values;
-
-  const bookingMaybe = bookingDates
-    ? {
-        bookingDates: {
-          bookingStart: bookingDates.startDate,
-          bookingEnd: bookingDates.endDate,
-        },
-      }
-    : bookingStartTime && bookingEndTime
-    ? {
-        bookingDates: {
-          bookingStart: timestampToDate(bookingStartTime),
-          bookingEnd: timestampToDate(bookingEndTime),
-        },
-      }
-    : {};
-  const quantity = Number.parseInt(quantityRaw, 10);
-  const quantityMaybe = Number.isInteger(quantity) ? { quantity } : {};
-  const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
+  const orderData = compileOrderData(values);
 
   const initialValues = {
     listing,
-    orderData: {
-      ...bookingMaybe,
-      ...quantityMaybe,
-      ...deliveryMethodMaybe,
-      ...otherOrderData,
-    },
+    orderData,
     confirmPaymentError: null,
   };
 
@@ -204,6 +171,37 @@ export const handleSubmit = parameters => values => {
     )
   );
 };
+
+export const handleSubmitOffSession = parameters => values => {
+  const {
+    history,
+    params,
+    routes,
+    currentUser,
+    getListing,
+    onInitiateOffSessionOrder,
+  } = parameters;
+
+  const listingId = new UUID(params.id);
+  const listing = getListing(listingId);
+
+  const orderData = compileOrderData(values);
+
+  // TODO: Handle a situation where the user wants to start an off-session flow
+  // but is not signed in
+  const saveToSessionStorage = !currentUser; 
+
+  const orderParams = {
+    listing,
+    orderData,
+  }
+
+  onInitiateOffSessionOrder(orderParams)
+    .then(txId => {
+      console.log({ txId })
+      history.push(createResourceLocatorString('OrderDetailsPage', routes, { id: txId.uuid }, {}));
+    })
+}
 
 /**
  * Create fallback views for the ListingPage: LoadingPage and ErrorPage.
@@ -253,3 +251,38 @@ export const LoadingPage = props => {
     </PlainPage>
   );
 };
+
+const compileOrderData = (values) => {
+  const {
+    bookingDates, bookingStartTime, bookingEndTime, bookingStartDate, // not relevant (omit)
+    bookingEndDate, // not relevant (omit)
+    quantity: quantityRaw, deliveryMethod, ...otherOrderData
+  } = values;
+
+  const bookingMaybe = bookingDates
+    ? {
+      bookingDates: {
+        bookingStart: bookingDates.startDate,
+        bookingEnd: bookingDates.endDate,
+      },
+    }
+    : bookingStartTime && bookingEndTime
+      ? {
+        bookingDates: {
+          bookingStart: timestampToDate(bookingStartTime),
+          bookingEnd: timestampToDate(bookingEndTime),
+        },
+      }
+      : {};
+  const quantity = Number.parseInt(quantityRaw, 10);
+  const quantityMaybe = Number.isInteger(quantity) ? { quantity } : {};
+  const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
+
+  const orderData = {
+    ...bookingMaybe,
+    ...quantityMaybe,
+    ...deliveryMethodMaybe,
+    ...otherOrderData,
+  };
+  return orderData;
+}
