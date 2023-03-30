@@ -197,6 +197,10 @@
    :on :transition/confirm-capture-payment,
    :to :actor.role/provider,
    :template :customer-paid}
+  {:name :notification/offer-payment-expired,
+   :on :transition/expire,
+   :to :actor.role/provider,
+   :template :payment-expired}
   {:name :notification/payment-expired,
    :on :transition/expire-payment,
    :to :actor.role/provider,
