@@ -40,7 +40,7 @@ const createEntryDayGroups = (entries = {}) => {
   // Collect info about which days are active in the availability plan form:
   let activePlanDays = [];
   return entries.reduce((groupedEntries, entry) => {
-    const { startTime, endTime: endHour, dayOfWeek } = entry;
+    const { startTime, endTime: endHour, dayOfWeek, seats } = entry;
     const dayGroup = groupedEntries[dayOfWeek] || [];
     activePlanDays = activePlanDays.includes(dayOfWeek)
       ? activePlanDays
@@ -52,6 +52,7 @@ const createEntryDayGroups = (entries = {}) => {
         {
           startTime,
           endTime: endHour === '00:00' ? '24:00' : endHour,
+          seats
         },
       ],
       activePlanDays,
@@ -74,12 +75,12 @@ const createEntriesFromSubmitValues = values =>
   WEEKDAYS.reduce((allEntries, dayOfWeek) => {
     const dayValues = values[dayOfWeek] || [];
     const dayEntries = dayValues.map(dayValue => {
-      const { startTime, endTime } = dayValue;
+      const { startTime, endTime, seats } = dayValue;
       // Note: This template doesn't support seats yet.
       return startTime && endTime
         ? {
             dayOfWeek,
-            seats: 1,
+            seats,
             startTime,
             endTime: endTime === '24:00' ? '00:00' : endTime,
           }
@@ -173,10 +174,9 @@ const EditListingAvailabilityPanel = props => {
 
   // Save exception click handler
   const saveException = values => {
-    const { availability, exceptionStartTime, exceptionEndTime, exceptionRange } = values;
+    const { availability, exceptionStartTime, exceptionEndTime, exceptionRange, seats } = values;
 
-    // TODO: add proper seat handling
-    const seats = availability === 'available' ? 1 : 0;
+    const newSeats = availability === 'available' ? seats : 0;
 
     // Exception date/time range is given through FieldDateRangeInput or
     // separate time fields.
@@ -192,7 +192,7 @@ const EditListingAvailabilityPanel = props => {
 
     const params = {
       listingId: listing.id,
-      seats,
+      seats: newSeats,
       ...range,
     };
 

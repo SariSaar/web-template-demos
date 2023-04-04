@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { intlShape, injectIntl, FormattedMessage } from '../../../../../util/reactIntl';
 import { propTypes } from '../../../../../util/types';
 
-import { Form, H3, PrimaryButton } from '../../../../../components';
+import { FieldTextInput, Form, H3, PrimaryButton } from '../../../../../components';
 
 import AvailabilityModeSelector from './AvailabilityModeSelector';
 import ExceptionDateTimeRange from './ExceptionDateTimeRange';
@@ -57,6 +57,9 @@ const EditListingAvailabilityExceptionForm = props => {
         } = values;
 
         const { updateListingError } = fetchErrors || {};
+
+        const formState = formApi.getState();
+        const isAvailable = formState.values.availability === 'available';
 
         const submitInProgress = updateInProgress;
         const hasData =
@@ -118,6 +121,14 @@ const EditListingAvailabilityExceptionForm = props => {
                   values={values}
                 />
               )}
+              {isAvailable && <FieldTextInput
+                id="seats"
+                name="seats"
+                type="number"
+                min="1"
+                label="Available seats"
+                placeholder="Select available seats..."
+              />}
             </div>
 
             <div className={css.submitButton}>
