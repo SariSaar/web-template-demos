@@ -145,6 +145,7 @@ export const handleSubmit = parameters => values => {
 
   const {
     bookingDates,
+    seats: seatsRaw = 1,
     bookingStartTime,
     bookingEndTime,
     bookingStartDate, // not relevant (omit)
@@ -153,6 +154,8 @@ export const handleSubmit = parameters => values => {
     deliveryMethod,
     ...otherOrderData
   } = values;
+
+  console.log({ seatsRaw })
 
   const bookingMaybe = bookingDates
     ? {
@@ -171,18 +174,23 @@ export const handleSubmit = parameters => values => {
     : {};
   const quantity = Number.parseInt(quantityRaw, 10);
   const quantityMaybe = Number.isInteger(quantity) ? { quantity } : {};
+  const seats = Number.parseInt(seatsRaw, 10);
+  const seatsMaybe = Number.isInteger(seats) ? { seats } : {};
   const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
 
   const initialValues = {
     listing,
     orderData: {
       ...bookingMaybe,
+      ...seatsMaybe,
       ...quantityMaybe,
       ...deliveryMethodMaybe,
       ...otherOrderData,
     },
     confirmPaymentError: null,
   };
+
+  console.log({ initialValues })
 
   const saveToSessionStorage = !currentUser;
 

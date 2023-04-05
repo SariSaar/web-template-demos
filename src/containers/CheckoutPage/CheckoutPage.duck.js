@@ -166,8 +166,9 @@ export const initiateOrder = (
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, bookingDates, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, seats, bookingDates, ...otherOrderParams } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
+  const seatsMaybe = seats ? { seats } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
@@ -176,6 +177,7 @@ export const initiateOrder = (
   // Parameters for Marketplace API
   const transitionParams = {
     ...quantityMaybe,
+    ...seatsMaybe,
     ...bookingParamsMaybe,
     ...otherOrderParams,
   };
@@ -317,8 +319,9 @@ export const speculateTransaction = (
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, bookingDates, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, seats, bookingDates, ...otherOrderParams } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
+  const seatsMaybe = seats ? { seats } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
@@ -327,6 +330,7 @@ export const speculateTransaction = (
   // Parameters for Marketplace API
   const transitionParams = {
     ...quantityMaybe,
+    ...seatsMaybe,
     ...bookingParamsMaybe,
     ...otherOrderParams,
     cardToken: 'CheckoutPage_speculative_card_token',
@@ -367,6 +371,8 @@ export const speculateTransaction = (
     });
     return dispatch(speculateTransactionError(storableError(e)));
   };
+
+  console.log({ orderData }, { bodyParams }, { queryParams })
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged

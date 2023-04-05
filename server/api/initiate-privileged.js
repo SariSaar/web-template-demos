@@ -27,6 +27,8 @@ module.exports = (req, res) => {
         },
       };
 
+      console.log({ body })
+
       if (isSpeculative) {
         return trustedSdk.transactions.initiateSpeculative(body, queryParams);
       }

@@ -371,12 +371,14 @@ const handleFormSpyChange = (
   fetchLineItemsInProgress,
   onFetchTransactionLineItems
 ) => formValues => {
-  const { startDate, endDate } =
-    formValues.values && formValues.values.bookingDates ? formValues.values.bookingDates : {};
+  const { seats, bookingDates } = formValues.values;
+
+  const { startDate, endDate } = bookingDates ? bookingDates : {};
 
   if (startDate && endDate && !fetchLineItemsInProgress) {
     onFetchTransactionLineItems({
       orderData: {
+        seats: parseInt(seats, 10),
         bookingStart: startDate,
         bookingEnd: endDate,
       },
@@ -459,6 +461,7 @@ export const BookingDatesFormComponent = props => {
           endDatePlaceholder,
           startDatePlaceholder,
           formId,
+          form: formApi,
           handleSubmit,
           intl,
           lineItemUnitType,
@@ -531,6 +534,34 @@ export const BookingDatesFormComponent = props => {
           dayCountAvailableForBooking,
           timeZone
         );
+
+        const selectedTimeSlot = (startDate, endDate,) => {
+          console.log({ monthlyTimeSlots })
+          console.log({ lineItemUnitType })
+          console.log({ timeZone })
+          console.log({ startDate })
+          console.log({ endDate })
+
+          return { seats: 5 };
+        }
+
+        const availableSeats = () => {
+          const formState = formApi.getState();
+          const { bookingDates } = formState.values;
+          console.log({formState}, { bookingDates })
+
+          if (!bookingDates) {
+            return null;
+          }
+
+          const timeSlot = selectedTimeSlot(bookingDates.startDate, bookingDates.endDate);
+
+          const { seats } = timeSlot;
+          return Array(seats)
+          .fill()
+          .map((_, i) => i + 1);
+
+        }
 
         return (
           <Form onSubmit={handleSubmit} className={classes} enforcePagePreloadFor="CheckoutPage">
@@ -608,6 +639,7 @@ export const BookingDatesFormComponent = props => {
               onClose={event =>
                 setCurrentMonth(getStartOf(event?.startDate ?? startOfToday, 'month', timeZone))
               }
+              availableSeats={availableSeats()}
             />
 
             {showEstimatedBreakdown ? (

@@ -88,6 +88,14 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
   return { quantity, extraLineItems: [] };
 };
 
+const getDateRangeUnitsSeatsLineItems = (orderData, code) => {
+  const { bookingStart, bookingEnd, seats } = orderData;
+
+  const units = bookingStart && bookingEnd ? calculateQuantityFromDates(bookingStart, bookingEnd, code) : null;
+
+  return { units, seats, extraLineItems: [] }
+}
+
 /** Returns collection of lineItems (max 50)
  *
  * Each line items has following fields:
@@ -112,6 +120,7 @@ exports.transactionLineItems = (listing, orderData) => {
   const publicData = listing.attributes.publicData;
   const unitPrice = listing.attributes.price;
   const currency = unitPrice.currency;
+  console.log('in lineItems.js', { orderData })
 
   /**
    * Pricing starts with order's base price:
@@ -136,14 +145,17 @@ exports.transactionLineItems = (listing, orderData) => {
       ? getItemQuantityAndLineItems(orderData, publicData, currency)
       : unitType === 'hour'
       ? getHourQuantityAndLineItems(orderData)
+      : ['day', 'night'].includes(unitType) && !!orderData.seats
+      ? getDateRangeUnitsSeatsLineItems(orderData, code)
       : ['day', 'night'].includes(unitType)
       ? getDateRangeQuantityAndLineItems(orderData, code)
       : {};
 
-  const { quantity, extraLineItems } = quantityAndExtraLineItems;
+  const { quantity, units, seats, extraLineItems } = quantityAndExtraLineItems;
+  console.log({ quantityAndExtraLineItems })
 
   // Throw error if there is no quantity information given
-  if (!quantity) {
+  if (!quantity && !(units && seats)) {
     const message = `Error: transition should contain quantity information: 
       stockReservationQuantity, quantity, or bookingStart & bookingEnd (if "line-item/day" or "line-item/night" is used)`;
     const error = new Error(message);
@@ -152,6 +164,8 @@ exports.transactionLineItems = (listing, orderData) => {
     error.data = {};
     throw error;
   }
+
+  const quantityOrSeats = !!units && !!seats ? { units, seats } : { quantity };
 
   /**
    * If you want to use pre-defined component and translations for printing the lineItems base price for order,
@@ -163,10 +177,11 @@ exports.transactionLineItems = (listing, orderData) => {
    *
    * By default OrderBreakdown prints line items inside LineItemUnknownItemsMaybe if the lineItem code is not recognized. */
 
+
   const order = {
     code,
     unitPrice,
-    quantity,
+    ...quantityOrSeats,
     includeFor: ['customer', 'provider'],
   };
 
@@ -182,6 +197,7 @@ exports.transactionLineItems = (listing, orderData) => {
   // Let's keep the base price (order) as first line item and provider's commission as last one.
   // Note: the order matters only if OrderBreakdown component doesn't recognize line-item.
   const lineItems = [order, ...extraLineItems, providerCommission];
+  console.log({ lineItems })
 
   return lineItems;
 };

@@ -325,17 +325,22 @@ export class CheckoutPageComponent extends Component {
           : process.transitions.REQUEST_PAYMENT;
       const isPrivileged = process.isPrivileged(requestTransition);
 
+      console.log({ pageData })
+
       // Fetch speculated transaction for showing price in order breakdown
       // NOTE: if unit type is line-item/item, quantity needs to be added.
       // The way to pass it to checkout page is through pageData.orderData
       const quantity = pageData.orderData?.quantity;
       const quantityMaybe = quantity ? { quantity } : {};
+      const seats = pageData.orderData?.seats;
+      const seatsMaybe = seats ? { seats } : {};
       const deliveryMethod = pageData.orderData?.deliveryMethod;
       fetchSpeculatedTransaction(
         {
           listingId,
           deliveryMethod,
           ...quantityMaybe,
+          ...seatsMaybe,
           ...bookingDatesMaybe(pageData.orderData.bookingDates),
         },
         processAlias,
@@ -514,6 +519,8 @@ export class CheckoutPageComponent extends Component {
 
     const quantity = pageData.orderData?.quantity;
     const quantityMaybe = quantity ? { quantity } : {};
+    const seats = pageData.orderData?.seats;
+    const seatsMaybe = seats ? { seats } : {};
     const deliveryMethod = pageData.orderData?.deliveryMethod;
     const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
     const shippingDetailsMaybe = shippingDetails ? { shippingDetails } : {};
@@ -539,6 +546,7 @@ export class CheckoutPageComponent extends Component {
       listingId: pageData.listing.id,
       deliveryMethod,
       ...quantityMaybe,
+      ...seatsMaybe,
       ...bookingDatesMaybe(pageData.orderData.bookingDates),
       ...protectedDataMaybe,
       ...optionalPaymentParams,

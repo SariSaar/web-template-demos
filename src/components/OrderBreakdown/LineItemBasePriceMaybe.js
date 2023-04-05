@@ -10,27 +10,39 @@ const LineItemBasePriceMaybe = props => {
   const isNightly = code === LINE_ITEM_NIGHT;
   const isDaily = code === LINE_ITEM_DAY;
   const isHourly = code === LINE_ITEM_HOUR;
-  const translationKey = isNightly
-    ? 'OrderBreakdown.baseUnitNight'
-    : isDaily
-    ? 'OrderBreakdown.baseUnitDay'
-    : isHourly
-    ? 'OrderBreakdown.baseUnitHour'
-    : 'OrderBreakdown.baseUnitQuantity';
 
+  const translationKey = isNightly
+  ? 'OrderBreakdown.baseUnitNight'
+  : isDaily
+  ? 'OrderBreakdown.baseUnitDay'
+  : isHourly
+  ? 'OrderBreakdown.baseUnitHour'
+  : 'OrderBreakdown.baseUnitQuantity';
+
+  const seatsTranslationKey = `${translationKey}Seats`;
+  
   // Find correct line-item for given code prop.
   // It should be one of the following: 'line-item/night, 'line-item/day', 'line-item/hour', or 'line-item/item'
   // These are defined in '../../util/types';
+  
   const unitPurchase = lineItems.find(item => item.code === code && !item.reversal);
-
-  const quantity = unitPurchase ? unitPurchase.quantity.toString() : null;
+  const quantity = unitPurchase?.units
+    ? unitPurchase.units.toString()
+    : unitPurchase?.quantity 
+    ? unitPurchase.quantity.toString() 
+    : null;
+  
   const unitPrice = unitPurchase ? formatMoney(intl, unitPurchase.unitPrice) : null;
   const total = unitPurchase ? formatMoney(intl, unitPurchase.lineTotal) : null;
+
+  const message = unitPurchase?.seats > 1
+    ? (<FormattedMessage id={seatsTranslationKey} values={{ unitPrice, quantity, seats: unitPurchase.seats }} />)
+    : (<FormattedMessage id={translationKey} values={{ unitPrice, quantity }} />)
 
   return quantity && total ? (
     <div className={css.lineItem}>
       <span className={css.itemLabel}>
-        <FormattedMessage id={translationKey} values={{ unitPrice, quantity }} />
+        {message}
       </span>
       <span className={css.itemValue}>{total}</span>
     </div>
