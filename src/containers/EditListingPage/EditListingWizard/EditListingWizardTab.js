@@ -18,6 +18,7 @@ import EditListingDeliveryPanel from './EditListingDeliveryPanel/EditListingDeli
 import EditListingLocationPanel from './EditListingLocationPanel/EditListingLocationPanel';
 import EditListingPhotosPanel from './EditListingPhotosPanel/EditListingPhotosPanel';
 import EditListingPricingPanel from './EditListingPricingPanel/EditListingPricingPanel';
+import EditListingRulesPanel from './EditListingRulesPanel/EditListingRulesPanel';
 import EditListingPricingAndStockPanel from './EditListingPricingAndStockPanel/EditListingPricingAndStockPanel';
 
 import css from './EditListingWizardTab.module.css';
@@ -25,6 +26,7 @@ import css from './EditListingWizardTab.module.css';
 export const DETAILS = 'details';
 export const PRICING = 'pricing';
 export const PRICING_AND_STOCK = 'pricing-and-stock';
+export const RULES = 'rules';
 export const DELIVERY = 'delivery';
 export const LOCATION = 'location';
 export const AVAILABILITY = 'availability';
@@ -35,6 +37,7 @@ export const SUPPORTED_TABS = [
   DETAILS,
   PRICING,
   PRICING_AND_STOCK,
+  RULES,
   DELIVERY,
   LOCATION,
   AVAILABILITY,
@@ -203,6 +206,13 @@ const EditListingWizardTab = props => {
           {...panelProps(PRICING)}
           marketplaceCurrency={config.currency}
           listingMinimumPriceSubUnits={config.listingMinimumPriceSubUnits}
+        />
+      );
+    }
+    case RULES: {
+      return (
+        <EditListingRulesPanel
+          {...panelProps(RULES)}
         />
       );
     }

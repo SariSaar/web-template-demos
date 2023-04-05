@@ -336,7 +336,7 @@ export const ListingPageComponent = props => {
                   ]
                 : pickedElements;
             }, [])}
-
+            <SectionTextMaybe text={publicData.rules} heading="Rules"/>
             <SectionMapMaybe
               geolocation={geolocation}
               publicData={publicData}

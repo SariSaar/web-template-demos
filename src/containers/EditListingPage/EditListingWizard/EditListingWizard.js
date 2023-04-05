@@ -40,6 +40,7 @@ import EditListingWizardTab, {
   PRICING,
   PRICING_AND_STOCK,
   DELIVERY,
+  RULES,
   LOCATION,
   AVAILABILITY,
   PHOTOS,
@@ -52,7 +53,7 @@ import css from './EditListingWizard.module.css';
 // and listing publishing happens after last panel.
 const TABS_DETAILS_ONLY = [DETAILS];
 const TABS_PRODUCT = [DETAILS, PRICING_AND_STOCK, DELIVERY, PHOTOS];
-const TABS_BOOKING = [DETAILS, LOCATION, PRICING, AVAILABILITY, PHOTOS];
+const TABS_BOOKING = [DETAILS, LOCATION, PRICING, RULES, AVAILABILITY, PHOTOS];
 const TABS_ALL = [...TABS_PRODUCT, ...TABS_BOOKING];
 
 // Tabs are horizontal in small screens
@@ -84,6 +85,9 @@ const tabLabelAndSubmit = (intl, tab, isNewListingFlow, processName) => {
   } else if (tab === PRICING_AND_STOCK) {
     labelKey = 'EditListingWizard.tabLabelPricingAndStock';
     submitButtonKey = `EditListingWizard.${processNameString}${newOrEdit}.savePricingAndStock`;
+  } else if (tab === RULES) {
+    labelKey = 'EditListingWizard.tabLabelRules';
+    submitButtonKey = `EditListingWizard.${processNameString}${newOrEdit}.saveRules`;
   } else if (tab === DELIVERY) {
     labelKey = 'EditListingWizard.tabLabelDelivery';
     submitButtonKey = `EditListingWizard.${processNameString}${newOrEdit}.saveDelivery`;
@@ -191,6 +195,8 @@ const tabCompleted = (tab, listing, config) => {
       return !!price;
     case PRICING_AND_STOCK:
       return !!price;
+    case RULES:
+        return !!publicData.rules;
     case DELIVERY:
       return !!deliveryOptionPicked;
     case LOCATION:
