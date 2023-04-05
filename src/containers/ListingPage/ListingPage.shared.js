@@ -155,8 +155,6 @@ export const handleSubmit = parameters => values => {
     ...otherOrderData
   } = values;
 
-  console.log({ seatsRaw })
-
   const bookingMaybe = bookingDates
     ? {
         bookingDates: {
@@ -189,8 +187,6 @@ export const handleSubmit = parameters => values => {
     },
     confirmPaymentError: null,
   };
-
-  console.log({ initialValues })
 
   const saveToSessionStorage = !currentUser;
 

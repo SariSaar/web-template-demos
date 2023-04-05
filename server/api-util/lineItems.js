@@ -152,7 +152,6 @@ exports.transactionLineItems = (listing, orderData) => {
       : {};
 
   const { quantity, units, seats, extraLineItems } = quantityAndExtraLineItems;
-  console.log({ quantityAndExtraLineItems })
 
   // Throw error if there is no quantity information given
   if (!quantity && !(units && seats)) {
@@ -197,7 +196,6 @@ exports.transactionLineItems = (listing, orderData) => {
   // Let's keep the base price (order) as first line item and provider's commission as last one.
   // Note: the order matters only if OrderBreakdown component doesn't recognize line-item.
   const lineItems = [order, ...extraLineItems, providerCommission];
-  console.log({ lineItems })
 
   return lineItems;
 };

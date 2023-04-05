@@ -372,8 +372,6 @@ export const speculateTransaction = (
     return dispatch(speculateTransactionError(storableError(e)));
   };
 
-  console.log({ orderData }, { bodyParams }, { queryParams })
-
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
     return transitionPrivileged({ isSpeculative: true, orderData, bodyParams, queryParams })
