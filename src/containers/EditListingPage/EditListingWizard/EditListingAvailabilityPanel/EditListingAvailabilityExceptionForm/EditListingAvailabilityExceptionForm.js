@@ -61,6 +61,17 @@ const EditListingAvailabilityExceptionForm = props => {
         const formState = formApi.getState();
         const isAvailable = formState.values.availability === 'available';
 
+        const seatsSelectMaybe = isAvailable ? (
+          <FieldTextInput
+            id="seats"
+            name="seats"
+            type="number"
+            min="1"
+            label="Available seats"
+            placeholder="Select available seats..."
+          />
+        ) : null;
+
         const submitInProgress = updateInProgress;
         const hasData =
           availability &&
@@ -121,14 +132,7 @@ const EditListingAvailabilityExceptionForm = props => {
                   values={values}
                 />
               )}
-              {isAvailable && <FieldTextInput
-                id="seats"
-                name="seats"
-                type="number"
-                min="1"
-                label="Available seats"
-                placeholder="Select available seats..."
-              />}
+              {seatsSelectMaybe}
             </div>
 
             <div className={css.submitButton}>

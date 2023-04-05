@@ -88,6 +88,12 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
   return { quantity, extraLineItems: [] };
 };
 
+/**
+ * Calculate units based on days or nights between given bookingDates. Returns units and seats.
+ * 
+ * @param {*} orderData should contain booking dates and seats
+ * @param {*} code should be either 'line-item/day' or 'line-item/night'
+ */
 const getDateRangeUnitsSeatsLineItems = (orderData, code) => {
   const { bookingStart, bookingEnd, seats } = orderData;
 
@@ -120,7 +126,6 @@ exports.transactionLineItems = (listing, orderData) => {
   const publicData = listing.attributes.publicData;
   const unitPrice = listing.attributes.price;
   const currency = unitPrice.currency;
-  console.log('in lineItems.js', { orderData })
 
   /**
    * Pricing starts with order's base price:
@@ -153,7 +158,7 @@ exports.transactionLineItems = (listing, orderData) => {
 
   const { quantity, units, seats, extraLineItems } = quantityAndExtraLineItems;
 
-  // Throw error if there is no quantity information given
+  // Throw error if there is no quantity or units and seats information given
   if (!quantity && !(units && seats)) {
     const message = `Error: transition should contain quantity information: 
       stockReservationQuantity, quantity, or bookingStart & bookingEnd (if "line-item/day" or "line-item/night" is used)`;
@@ -164,6 +169,8 @@ exports.transactionLineItems = (listing, orderData) => {
     throw error;
   }
 
+  // Booking line item can have either quantity, or units and seats. Add the 
+  // correct values depending on whether units and seats exist.
   const quantityOrSeats = !!units && !!seats ? { units, seats } : { quantity };
 
   /**

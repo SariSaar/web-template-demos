@@ -12,19 +12,18 @@ const LineItemBasePriceMaybe = props => {
   const isHourly = code === LINE_ITEM_HOUR;
 
   const translationKey = isNightly
-  ? 'OrderBreakdown.baseUnitNight'
-  : isDaily
-  ? 'OrderBreakdown.baseUnitDay'
-  : isHourly
-  ? 'OrderBreakdown.baseUnitHour'
-  : 'OrderBreakdown.baseUnitQuantity';
+    ? 'OrderBreakdown.baseUnitNight'
+    : isDaily
+    ? 'OrderBreakdown.baseUnitDay'
+    : isHourly
+    ? 'OrderBreakdown.baseUnitHour'
+    : 'OrderBreakdown.baseUnitQuantity';
 
   const seatsTranslationKey = `${translationKey}Seats`;
   
   // Find correct line-item for given code prop.
   // It should be one of the following: 'line-item/night, 'line-item/day', 'line-item/hour', or 'line-item/item'
   // These are defined in '../../util/types';
-  
   const unitPurchase = lineItems.find(item => item.code === code && !item.reversal);
   const quantity = unitPurchase?.units
     ? unitPurchase.units.toString()

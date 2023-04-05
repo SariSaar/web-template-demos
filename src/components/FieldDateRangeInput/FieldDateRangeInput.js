@@ -119,21 +119,24 @@ class FieldDateRangeInputComponent extends Component {
     const classes = classNames(rootClassName || css.fieldRoot, className);
     const errorClasses = classNames({ [css.mobileMargins]: useMobileMargins });
 
+    const seatsArrayMaybe = seatsArray ? (
+      <FieldSelect
+        name="seats"
+        id="seats"
+        label="Choose number of seats"
+        >
+        {seatsArray.map(s => (
+          <option value={s} key={s}>{s}</option>
+        ))}
+      </FieldSelect>
+      ) : null;
+
     return (
       <div className={classes}>
         {label}
         <DateRangeInput {...inputProps} />
         <ValidationError className={errorClasses} fieldMeta={meta} />
-        {seatsArray && (
-          <FieldSelect
-            name="seats"
-            id="seats"
-            label="Choose number of seats"
-            >
-            {seatsArray.map(s => (
-              <option value={s} key={s}>{s}</option>
-            ))}
-          </FieldSelect>)}
+        {seatsArrayMaybe}
       </div>
     );
   }

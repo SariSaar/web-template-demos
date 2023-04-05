@@ -53,6 +53,14 @@ const pickMonthlyTimeSlots = (monthlyTimeSlots, date, timeZone) => {
   return monthlyTimeSlots?.[monthId]?.timeSlots || [];
 };
 
+/**
+ * Return an array of timeslots for the months of start date and end date
+ * @param {*} monthlyTimeSlots 
+ * @param {*} startDate 
+ * @param {*} endDate 
+ * @param {*} timeZone 
+ * @returns 
+ */
 const pickBookingMonthTimeSlots = (monthlyTimeSlots, startDate, endDate, timeZone) => {
   const startDateAsDate = new Date(startDate);
   const endDateAsDate = new Date(endDate);
@@ -66,8 +74,6 @@ const pickBookingMonthTimeSlots = (monthlyTimeSlots, startDate, endDate, timeZon
     return pickMonthlyTimeSlots(monthlyTimeSlots, startDate, timeZone);
   }
 }
-
-
 
 /**
  * Find first blocked date between two dates.
@@ -233,6 +239,38 @@ const timeSlotEqualsDay = (timeSlot, day, timeZone) => {
     ? isInRange(day, timeSlot.attributes.start, timeSlot.attributes.end, undefined, timeZone)
     : false;
 };
+
+// Get the time slot for a booking duration that has the least seats
+const getMinSeatsTimeSlot = (monthlyTimeSlots, timeZone, startDate, endDate) => {
+  const timeSlots = pickBookingMonthTimeSlots(monthlyTimeSlots, startDate, endDate, timeZone);
+
+  // Determine the timeslots that fall between start date and end date
+  const bookingTimeslots = timeSlots.filter(ts => {
+    const { start, end } = ts.attributes;
+    return (
+      // booking start date falls within time slot
+      (start < startDate && end > startDate)
+      ||
+      // whole booking falls within time slot
+      (start >= startDate && end <= endDate)
+      ||
+      // booking end date falls within time slot
+      (start < endDate && end > endDate)
+    );
+  });
+
+  // Return the timeslot with the least seats in the booking period
+  return bookingTimeslots.reduce((minSeats, ts) => {
+    if (!minSeats?.seats) {
+      return ts.attributes;
+    }
+
+    return ts.attributes.seats < minSeats.seats
+      ? ts.attributes
+      : minSeats;
+  }, {});
+};
+
 
 /**
  * Returns an isDayBlocked function that can be passed to
@@ -551,36 +589,6 @@ export const BookingDatesFormComponent = props => {
           timeZone
         );
 
-        const getMinSeatsTimeSlot = (startDate, endDate,) => {
-          const timeSlots = pickBookingMonthTimeSlots(monthlyTimeSlots, startDate, endDate, timeZone);
-
-          // Determine the timeslots that fall between start date and end date
-          const bookingTimeslots = timeSlots.filter(ts => {
-            const { start, end } = ts.attributes
-            return (
-              // booking start date falls within time slot
-              (start < startDate && end > startDate)
-              ||
-              // whole booking falls within time slot
-              (start >= startDate && end <= endDate)
-              ||
-              // booking end date falls within time slot
-              (start < endDate && end > endDate) 
-            )
-          })
-
-          // Return the timeslot with the least seats in the booking period
-          return bookingTimeslots.reduce((minSeats, ts) => {
-            if (!minSeats?.seats) {
-              return ts.attributes;
-            }
-
-            return ts.attributes.seats < minSeats.seats
-              ? ts.attributes
-              : minSeats
-          }, {})
-        }
-
         const getSeatsArray = () => {
           const formState = formApi.getState();
           const { bookingDates } = formState.values;
@@ -589,7 +597,7 @@ export const BookingDatesFormComponent = props => {
             return null;
           }
 
-          const minSeatsTimeSlot = getMinSeatsTimeSlot(bookingDates.startDate, bookingDates.endDate);
+          const minSeatsTimeSlot = getMinSeatsTimeSlot(monthlyTimeSlots, timeZone, bookingDates.startDate, bookingDates.endDate);
 
           return Array(minSeatsTimeSlot.seats)
             .fill()
@@ -759,3 +767,4 @@ const BookingDatesForm = compose(injectIntl)(BookingDatesFormComponent);
 BookingDatesForm.displayName = 'BookingDatesForm';
 
 export default BookingDatesForm;
+

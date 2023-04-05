@@ -176,7 +176,7 @@ const EditListingAvailabilityPanel = props => {
   const saveException = values => {
     const { availability, exceptionStartTime, exceptionEndTime, exceptionRange, seats } = values;
 
-    const newSeats = availability === 'available' ? seats : 0;
+    const updatedSeats = availability === 'available' ? seats : 0;
 
     // Exception date/time range is given through FieldDateRangeInput or
     // separate time fields.
@@ -192,7 +192,7 @@ const EditListingAvailabilityPanel = props => {
 
     const params = {
       listingId: listing.id,
-      seats: newSeats,
+      seats: updatedSeats,
       ...range,
     };
 
