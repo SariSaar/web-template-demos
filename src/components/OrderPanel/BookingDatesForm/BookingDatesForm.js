@@ -53,6 +53,22 @@ const pickMonthlyTimeSlots = (monthlyTimeSlots, date, timeZone) => {
   return monthlyTimeSlots?.[monthId]?.timeSlots || [];
 };
 
+const pickBookingMonthTimeSlots = (monthlyTimeSlots, startDate, endDate, timeZone) => {
+  const startDateAsDate = new Date(startDate);
+  const endDateAsDate = new Date(endDate);
+  
+  if (startDateAsDate.getMonth() !== endDateAsDate.getMonth()) {
+    // TODO: Handle situation where months are several months apart
+    const startMonthTimeSlots = pickMonthlyTimeSlots(monthlyTimeSlots, startDate, timeZone);
+    const nextMonthTimeSlots = pickMonthlyTimeSlots(monthlyTimeSlots, endDate, timeZone);
+    return [...startMonthTimeSlots, ...nextMonthTimeSlots];
+  } else {
+    return pickMonthlyTimeSlots(monthlyTimeSlots, startDate, timeZone);
+  }
+}
+
+
+
 /**
  * Find first blocked date between two dates.
  * If none is found, null is returned.
@@ -535,32 +551,49 @@ export const BookingDatesFormComponent = props => {
           timeZone
         );
 
-        const selectedTimeSlot = (startDate, endDate,) => {
-          console.log({ monthlyTimeSlots })
-          console.log({ lineItemUnitType })
-          console.log({ timeZone })
-          console.log({ startDate })
-          console.log({ endDate })
+        const getMinSeatsTimeSlot = (startDate, endDate,) => {
+          const timeSlots = pickBookingMonthTimeSlots(monthlyTimeSlots, startDate, endDate, timeZone);
 
-          return { seats: 5 };
+          // Determine the timeslots that fall between start date and end date
+          const bookingTimeslots = timeSlots.filter(ts => {
+            const { start, end } = ts.attributes
+            return (
+              // booking start date falls within time slot
+              (start < startDate && end > startDate)
+              ||
+              // whole booking falls within time slot
+              (start >= startDate && end <= endDate)
+              ||
+              // booking end date falls within time slot
+              (start < endDate && end > endDate) 
+            )
+          })
+
+          // Return the timeslot with the least seats in the booking period
+          return bookingTimeslots.reduce((minSeats, ts) => {
+            if (!minSeats?.seats) {
+              return ts.attributes;
+            }
+
+            return ts.attributes.seats < minSeats.seats
+              ? ts.attributes
+              : minSeats
+          }, {})
         }
 
-        const availableSeats = () => {
+        const getSeatsArray = () => {
           const formState = formApi.getState();
           const { bookingDates } = formState.values;
-          console.log({formState}, { bookingDates })
 
           if (!bookingDates) {
             return null;
           }
 
-          const timeSlot = selectedTimeSlot(bookingDates.startDate, bookingDates.endDate);
+          const minSeatsTimeSlot = getMinSeatsTimeSlot(bookingDates.startDate, bookingDates.endDate);
 
-          const { seats } = timeSlot;
-          return Array(seats)
-          .fill()
-          .map((_, i) => i + 1);
-
+          return Array(minSeatsTimeSlot.seats)
+            .fill()
+            .map((_, i) => i + 1);
         }
 
         return (
@@ -639,7 +672,7 @@ export const BookingDatesFormComponent = props => {
               onClose={event =>
                 setCurrentMonth(getStartOf(event?.startDate ?? startOfToday, 'month', timeZone))
               }
-              availableSeats={availableSeats()}
+              seatsArray={getSeatsArray()}
             />
 
             {showEstimatedBreakdown ? (

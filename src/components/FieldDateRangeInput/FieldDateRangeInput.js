@@ -70,7 +70,7 @@ class FieldDateRangeInputComponent extends Component {
       // the same values will not be passed on to subcomponents.
       focusedInput,
       onFocusedInputChange,
-      availableSeats,
+      seatsArray,
       ...rest
     } = this.props;
     /* eslint-disable no-unused-vars */
@@ -82,8 +82,6 @@ class FieldDateRangeInputComponent extends Component {
     if (endDateLabel && !endDateId) {
       throw new Error('endDateId required when a endDateLabel is given');
     }
-
-    console.log({ availableSeats })
 
     // If startDate is valid label changes color and bottom border changes color too
     const startDateLabelClasses = classNames(css.startDateLabel);
@@ -126,14 +124,15 @@ class FieldDateRangeInputComponent extends Component {
         {label}
         <DateRangeInput {...inputProps} />
         <ValidationError className={errorClasses} fieldMeta={meta} />
-        {availableSeats && (<FieldSelect
-          name="seats"
-          id="seats"
-          label="Choose number of seats"
-          >
-          {availableSeats.map(s => (
-            <option value={s} key={s}>{s}</option>
-          ))}
+        {seatsArray && (
+          <FieldSelect
+            name="seats"
+            id="seats"
+            label="Choose number of seats"
+            >
+            {seatsArray.map(s => (
+              <option value={s} key={s}>{s}</option>
+            ))}
           </FieldSelect>)}
       </div>
     );
