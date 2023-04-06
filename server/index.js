@@ -21,6 +21,7 @@ require('./env').configureEnv();
 
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
 const express = require('express');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -31,13 +32,13 @@ const path = require('path');
 const sharetribeSdk = require('sharetribe-flex-sdk');
 const sitemap = require('express-sitemap');
 const passport = require('passport');
+
 const auth = require('./auth');
 const apiRouter = require('./apiRouter');
 const wellKnownRouter = require('./wellKnownRouter');
 const { getExtractors } = require('./importer');
 const renderer = require('./renderer');
 const dataLoader = require('./dataLoader');
-const fs = require('fs');
 const log = require('./log');
 const { sitemapStructure } = require('./sitemap');
 const csp = require('./csp');
@@ -52,6 +53,11 @@ const BASE_URL = process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL;
 const ASSET_CDN_BASE_URL = process.env.REACT_APP_SHARETRIBE_SDK_ASSET_CDN_BASE_URL;
 const TRANSIT_VERBOSE = process.env.REACT_APP_SHARETRIBE_SDK_TRANSIT_VERBOSE === 'true';
 const USING_SSL = process.env.REACT_APP_SHARETRIBE_USING_SSL === 'true';
+const redirectSSL =
+  process.env.SERVER_SHARETRIBE_REDIRECT_SSL != null
+    ? process.env.SERVER_SHARETRIBE_REDIRECT_SSL
+    : process.env.REACT_APP_SHARETRIBE_USING_SSL;
+const REDIRECT_SSL = redirectSSL === 'true';
 const TRUST_PROXY = process.env.SERVER_SHARETRIBE_TRUST_PROXY || null;
 const CSP = process.env.REACT_APP_CSP;
 const cspReportUrl = '/csp-report';
@@ -79,6 +85,9 @@ app.use(log.requestHandler());
 app.use(
   helmet({
     contentSecurityPolicy: false,
+    // This seems to cause problems with Youtube player
+    // Issue tracker: https://issuetracker.google.com/issues/240387105
+    crossOriginEmbedderPolicy: false,
   })
 );
 
@@ -100,17 +109,17 @@ if (cspEnabled) {
   // That's why we need to create own middleware function that calls the Helmet's middleware function
   const reportOnly = CSP === 'report';
   app.use((req, res, next) => {
-    csp(cspReportUrl, USING_SSL, reportOnly)(req, res, next);
+    csp(cspReportUrl, reportOnly)(req, res, next);
   });
 }
 
-// Redirect HTTP to HTTPS if USING_SSL is `true`.
+// Redirect HTTP to HTTPS if REDIRECT_SSL is `true`.
 // This also works behind reverse proxies (load balancers) as they are for example used by Heroku.
 // In such cases, however, the TRUST_PROXY parameter has to be set (see below)
 //
 // Read more: https://github.com/aredo/express-enforces-ssl
 //
-if (USING_SSL) {
+if (REDIRECT_SSL) {
   app.use(enforceSsl());
 }
 
@@ -294,10 +303,21 @@ if (cspEnabled) {
   });
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   const mode = dev ? 'development' : 'production';
   console.log(`Listening to port ${PORT} in ${mode} mode`);
   if (dev) {
     console.log(`Open http://localhost:${PORT}/ and start hacking!`);
   }
+});
+
+// Graceful shutdown:
+// https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html
+['SIGINT', 'SIGTERM'].forEach(signal => {
+  process.on(signal, () => {
+    console.log('Shutting down...');
+    server.close(() => {
+      console.log('Server shut down.');
+    });
+  });
 });
