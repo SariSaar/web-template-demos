@@ -62,6 +62,7 @@ import {
   handleContactUser,
   handleSubmitInquiry,
   handleSubmit,
+  handleToggleFavorites,
 } from './ListingPage.shared';
 import ActionBarMaybe from './ActionBarMaybe';
 import SectionTextMaybe from './SectionTextMaybe';
@@ -73,6 +74,7 @@ import SectionMapMaybe from './SectionMapMaybe';
 import SectionGallery from './SectionGallery';
 
 import css from './ListingPage.module.css';
+import { updateProfile } from '../ProfileSettingsPage/ProfileSettingsPage.duck';
 
 const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
@@ -100,6 +102,7 @@ export const ListingPageComponent = props => {
     sendInquiryError,
     monthlyTimeSlots,
     onFetchTimeSlots,
+    onUpdateFavorites,
     listingConfig: listingConfigProp,
     onFetchTransactionLineItems,
     lineItems,
@@ -220,6 +223,12 @@ export const ListingPageComponent = props => {
     getListing,
     onInitializeCardPaymentData,
   });
+
+  const onToggleFavorites = handleToggleFavorites({
+    ...commonParams,
+    currentUser,
+    onUpdateFavorites,
+  })
 
   const handleOrderSubmit = values => {
     const isCurrentlyClosed = currentListing.attributes.state === LISTING_STATE_CLOSED;
@@ -382,6 +391,8 @@ export const ListingPageComponent = props => {
               }
               author={ensuredAuthor}
               onManageDisableScrolling={onManageDisableScrolling}
+              onToggleFavorites={onToggleFavorites}
+              currentUser={currentUser}
               onContactUser={onContactUser}
               monthlyTimeSlots={monthlyTimeSlots}
               onFetchTimeSlots={onFetchTimeSlots}
@@ -542,6 +553,7 @@ const mapDispatchToProps = dispatch => ({
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
+  onUpdateFavorites: (payload) => dispatch(updateProfile(payload)),
   onFetchTimeSlots: (listingId, start, end, timeZone) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone)),
 });

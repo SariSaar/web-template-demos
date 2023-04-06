@@ -100,6 +100,10 @@
   }
 }
 
+.favoriteButton {
+  margin: 12px 0 36px 0;
+}
+
 .providerAvatar {
   display: none;
 

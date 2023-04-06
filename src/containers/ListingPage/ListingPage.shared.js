@@ -205,6 +205,35 @@ export const handleSubmit = parameters => values => {
   );
 };
 
+export const handleToggleFavorites = parameters => isFavorite => {
+  const { params, onUpdateFavorites, currentUser: { attributes: { profile } } } = parameters;
+  const { favorites = [] } = profile.privateData || {};
+
+  let payload;
+
+  if (!profile.privateData || !profile.privateData?.favorites) {
+    payload = {
+      privateData: {
+        favorites: [params.id]
+      }
+    }
+  } else if (isFavorite) {
+    payload = {
+      privateData: {
+        favorites: favorites.filter(f => f !== params.id)
+      }
+    }
+  } else {
+    payload = {
+      privateData: {
+        favorites: [...favorites, params.id]
+      }
+    }
+  }
+
+  onUpdateFavorites(payload)
+}
+
 /**
  * Create fallback views for the ListingPage: LoadingPage and ErrorPage.
  * The PlainPage is just a helper for them.

@@ -24,7 +24,7 @@ import {
   resolveLatestProcessName,
 } from '../../transactions/transaction';
 
-import { ModalInMobile, PrimaryButton, AvatarSmall, H1, H2 } from '../../components';
+import { ModalInMobile, PrimaryButton, AvatarSmall, H1, H2, Button, SecondaryButton } from '../../components';
 
 import css from './OrderPanel.module.css';
 
@@ -90,6 +90,8 @@ const OrderPanel = props => {
     onManageDisableScrolling,
     onFetchTimeSlots,
     monthlyTimeSlots,
+    onToggleFavorites,
+    currentUser,
     history,
     location,
     intl,
@@ -107,6 +109,8 @@ const OrderPanel = props => {
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const unitType = listing?.attributes?.publicData?.unitType;
   const lineItemUnitType = lineItemUnitTypeMaybe || `line-item/${unitType}`;
+
+  const isFavorite = currentUser?.attributes?.profile.privateData?.favorites.includes(listing.id.uuid);
 
   const price = listing?.attributes?.price;
 
@@ -166,6 +170,28 @@ const OrderPanel = props => {
 
   const classes = classNames(rootClassName || css.root, className);
   const titleClasses = classNames(titleClassName || css.orderTitle);
+  const buttonClasses = classNames(css.favoriteButton, )
+
+  const toggleFavorites = (values) => {
+    console.log('inside orderpanel', { values }, {isFavorite})
+    onToggleFavorites(isFavorite)
+  }
+
+  const favoriteButton = isFavorite ? (
+    <SecondaryButton
+      className={css.favoriteButton}
+      onClick={toggleFavorites}
+    >
+      Unfavorite
+    </SecondaryButton>
+  ) : (
+    <Button 
+      className={css.favoriteButton}
+      onClick={toggleFavorites}
+    >
+      Add to favorites
+    </Button>
+  )
 
   return (
     <div className={classes}>
@@ -205,7 +231,7 @@ const OrderPanel = props => {
             <FormattedMessage id="OrderPanel.author" values={{ name: authorDisplayName }} />
           </span>
         </div>
-
+        {favoriteButton}
         {showPriceMissing ? (
           <PriceMissing />
         ) : showInvalidCurrency ? (
