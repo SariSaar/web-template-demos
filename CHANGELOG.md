@@ -14,6 +14,53 @@ way to update this template, but currently, we follow a pattern:
 
 ## Upcoming version 2023-XX-XX
 
+- [fix] ListingImageGallery: Mobile Safari was not showing thumbnail stripe correctly, if the
+  content overflew. [#158](https://github.com/sharetribe/web-template/pull/158)
+- [change] Update README.md [#157](https://github.com/sharetribe/web-template/pull/157)
+
+## [v1.0.0] 2023-04-25
+
+This is the official release of Sharetribe Web Template, which combines the features of FTW-daily,
+FTW-hourly and FTW-product into one configurable web template. It makes it easy to do things like
+change the default transaction process (it supports two different processes, booking and purchase,
+out of the box), switch between layout options, add custom fields and filters, and much more, all
+through simple JSON configurations. The new template also features a new availability management
+experience, redesigned email notifications, and several other improvements.
+
+### Changes on top of the **beta** release
+
+- [change] Update default booking transaction process and email templates.
+  [#155](https://github.com/sharetribe/web-template/pull/155)
+- [change] AuthenticationPage: long email address caused overflow on mobile layout.
+  [#154](https://github.com/sharetribe/web-template/pull/154)
+- [fix] Fix booking email templates to show correct end date in day-based bookings
+  [#153](https://github.com/sharetribe/web-template/pull/153)
+- [change] OrderPanel: separate mobile CTA buttons per process type
+  [#152](https://github.com/sharetribe/web-template/pull/152)
+- [fix] EditListingWizard: fix handling for outdated (old) listings.
+  [#151](https://github.com/sharetribe/web-template/pull/151)
+- [change] ListingImageGallery: thumbnail stripe was not overflowing correctly on mobile screens
+  [#150](https://github.com/sharetribe/web-template/pull/150)
+- [change] ListingImageGallery: prefer the aspect ratio of the first image with limits (2/1 ... 4/3)
+  [#149](https://github.com/sharetribe/web-template/pull/149)
+- [fix] ListingImageGallery: don't use sizes on fullscreen mode.
+  [#148](https://github.com/sharetribe/web-template/pull/148)
+- [fix] Mobile font-size had degraded to too small.
+  [#147](https://github.com/sharetribe/web-template/pull/147)
+- [fix] Email templates: Show booking time based on line item type in booking templates
+  [#145](https://github.com/sharetribe/web-template/pull/145)
+- [change] Listing field of type enum should be explicitly handled as strings.
+  [#146](https://github.com/sharetribe/web-template/pull/146)
+- [fix] ListingImageGallery was not setting image dimensions aka sizes.
+  [#144](https://github.com/sharetribe/web-template/pull/144)
+- [change] change the default aspect ratio of listing cards to 4/3.
+  [#143](https://github.com/sharetribe/web-template/pull/143)
+- [change] Add a new automatic transition to the default-booking transaction process and adjust the
+  timing of the complete transition [#142](https://github.com/sharetribe/web-template/pull/142)
+- [fix] Email templates: fix layout-breaking condition in purchase templates.
+  [141](https://github.com/sharetribe/web-template/pull/141)
+- [fix] Fix indentation in default transaction process email templates.
+  [#140](https://github.com/sharetribe/web-template/pull/140)
 - [fix] SearchPage error transparency and PageBuilder bg colors of sections.
   [#139](https://github.com/sharetribe/web-template/pull/139)
 - [fix] EditListingDetailsForm: set listingFieldsConfig default prop to empty array to fix a bug
@@ -36,6 +83,8 @@ way to update this template, but currently, we follow a pattern:
   [#135](https://github.com/sharetribe/web-template/pull/135)
 - [fix] SearchPages: show message if date range is invalid and ignore it.
   [#134](https://github.com/sharetribe/web-template/pull/134)
+
+[v1.0.0]: https://github.com/sharetribe/web-template/compare/v1.0.0-beta...v1.0.0
 
 ## v1.0.0-beta 2023-03-29
 
@@ -442,8 +491,7 @@ and the Docs will be updated to reflect the fact that this is the new default Te
 - [delete] Update README.md after changes in [#1555].
   [#1569](https://github.com/sharetribe/ftw-daily/pull/1569)
 - [change] Added some dependabot updates earlier: passport-0.6.0, loader-utils-2.0.4,
-  decode-uri-component-0.2.2  
-  Note: Passport-0.6.0 changed login and logout parameter list.
+  decode-uri-component-0.2.2 Note: Passport-0.6.0 changed login and logout parameter list.
 - [change] Update Browserlist db / caniuse-lite.
   [#1567](https://github.com/sharetribe/ftw-daily/pull/1567)
 - [change] Update minimum Node version to >=16.18.0. (v14.15 had problems with some libs and v14
