@@ -44,6 +44,7 @@ import SearchResultsPanel from './SearchResultsPanel/SearchResultsPanel';
 import NoSearchResultsMaybe from './NoSearchResultsMaybe/NoSearchResultsMaybe';
 
 import css from './SearchPage.module.css';
+import { getSupportedLocale } from '../../app';
 
 const MODAL_BREAKPOINT = 768; // Search is in modal on mobile layout
 
@@ -97,7 +98,7 @@ export class SearchPageComponent extends Component {
 
     // Reset routing params
     const queryParams = omit(urlQueryParams, filterQueryParamNames);
-    history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, queryParams));
+    history.push(createResourceLocatorString('SearchPage', routeConfiguration, { locale: pathLocale}, queryParams));
   }
 
   getHandleChangedValueFn(useHistoryPush) {
@@ -137,7 +138,7 @@ export class SearchPageComponent extends Component {
             defaultFiltersConfig,
             sortConfig
           );
-          history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, search));
+          history.push(createResourceLocatorString('SearchPage', routeConfiguration, {locale: pathLocale}, search));
         }
       };
 
@@ -180,6 +181,8 @@ export class SearchPageComponent extends Component {
       routeConfiguration,
       config,
     } = this.props;
+
+    const pathLocale = getSupportedLocale(location.pathname);
 
     const { listingFields: listingFieldsConfig } = config?.listing || {};
     const { defaultFilters: defaultFiltersConfig, sortConfig } = config?.search || {};
@@ -279,7 +282,8 @@ export class SearchPageComponent extends Component {
       searchParamsInURL || {},
       intl,
       routeConfiguration,
-      config
+      config,
+      pathLocale
     );
 
     // Set topbar class based on if a modal is open in
@@ -396,6 +400,7 @@ export class SearchPageComponent extends Component {
                   pagination={listingsAreLoaded ? pagination : null}
                   search={parse(location.search)}
                   isMapVariant={false}
+                  locale={pathLocale}
                 />
               </div>
             </div>

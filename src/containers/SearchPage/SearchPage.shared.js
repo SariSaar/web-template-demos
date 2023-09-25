@@ -339,7 +339,8 @@ export const createSearchResultSchema = (
   mainSearchData,
   intl,
   routeConfiguration,
-  config
+  config,
+  pathLocale
 ) => {
   // Schema for search engines (helps them to understand what this page is about)
   // http://schema.org
@@ -360,6 +361,7 @@ export const createSearchResultSchema = (
     const pathToItem = createResourceLocatorString('ListingPage', routeConfiguration, {
       id: l.id.uuid,
       slug: createSlug(title),
+      locale: pathLocale
     });
     return {
       '@type': 'ListItem',

@@ -77,6 +77,7 @@ export const ListingCardComponent = props => {
     renderSizes,
     setActiveListing,
     showAuthorInfo,
+    locale,
   } = props;
   const classes = classNames(rootClassName || css.root, className);
   const currentListing = ensureListing(listing);
@@ -105,7 +106,7 @@ export const ListingCardComponent = props => {
     : null;
 
   return (
-    <NamedLink className={classes} name="ListingPage" params={{ id, slug }}>
+    <NamedLink className={classes} name="ListingPage" params={{ id, slug, locale }}>
       <AspectRatioWrapper
         className={css.aspectRatioWrapper}
         width={aspectWidth}

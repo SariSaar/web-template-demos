@@ -16,6 +16,7 @@ const SearchResultsPanel = props => {
     search,
     setActiveListing,
     isMapVariant,
+    locale
   } = props;
   const classes = classNames(rootClassName || css.root, className);
 
@@ -64,6 +65,7 @@ const SearchResultsPanel = props => {
             listing={l}
             renderSizes={cardRenderSizes(isMapVariant)}
             setActiveListing={setActiveListing}
+            locale={locale}
           />
         ))}
         {props.children}

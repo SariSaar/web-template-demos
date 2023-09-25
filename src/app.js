@@ -55,7 +55,8 @@ import defaultMessages from './translations/en.json';
 // - you can add your preferred locale to MomentLocaleLoader or
 // - stop using MomentLocaleLoader component and directly import the locale here.
 // E.g. for French:
-// import 'moment/locale/fr';
+import 'moment/locale/fr';
+import 'moment/locale/es';
 // const hardCodedLocale = process.env.NODE_ENV === 'test' ? 'en' : 'fr';
 
 // Step 3:
@@ -71,8 +72,15 @@ import defaultMessages from './translations/en.json';
 //   3. en.json
 //
 // I.e. remove "const messagesInLocale" and add import for the correct locale:
-// import messagesInLocale from './translations/fr.json';
-const messagesInLocale = {};
+// TODO use Loadable
+import messagesFr from './translations/fr.json';
+import messagesEs from './translations/es.json';
+const messagesInLocale = {
+  es: messagesEs,
+  fr: messagesFr,
+  en: defaultMessages,
+  ['en-US']: defaultMessages,
+};
 
 // If translation key is missing from `messagesInLocale` (e.g. fr.json),
 // corresponding key will be added to messages from `defaultMessages` (en.json)
@@ -101,15 +109,19 @@ const addMissingTranslations = (sourceLangTranslations, targetLangTranslations) 
 //       messages with the key as the value of each message and discard the value.
 //       { 'My.translationKey1': 'My.translationKey1', 'My.translationKey2': 'My.translationKey2' }
 const isTestEnv = process.env.NODE_ENV === 'test';
-const localeMessages = isTestEnv
+const localeMessages = (locale = 'en') => {
+  console.log({ localemessages: messagesInLocale[locale] })
+  return isTestEnv
   ? mapValues(defaultMessages, (val, key) => key)
-  : addMissingTranslations(defaultMessages, messagesInLocale);
+  : addMissingTranslations(defaultMessages, messagesInLocale[locale]);
+}
 
 // For customized apps, this dynamic loading of locale files is not necessary.
 // It helps locale change from configDefault.js file or hosted configs, but customizers should probably
 // just remove this and directly import the necessary locale on step 2.
 const MomentLocaleLoader = props => {
   const { children, locale } = props;
+  console.log({ messagesInLocale }, { locale })
   const isAlreadyImportedLocale =
     typeof hardCodedLocale !== 'undefined' && locale === hardCodedLocale;
 
@@ -132,7 +144,8 @@ const MomentLocaleLoader = props => {
       : ['nl', 'nl-NL'].includes(locale)
       ? loadable.lib(() => import(/* webpackChunkName: "nl" */ 'moment/locale/nl'))
       : loadable.lib(() => import(/* webpackChunkName: "locales" */ 'moment/min/locales.min'));
-
+      
+    console.log(locale, 'in MomentLocaleLoader')
   return (
     <MomentLocale>
       {() => {
@@ -146,13 +159,14 @@ const MomentLocaleLoader = props => {
 };
 
 const Configurations = props => {
-  const { appConfig, children } = props;
+  const { appConfig, locale, children } = props;
   const routeConfig = routeConfiguration(appConfig.layout);
-  const locale = isTestEnv ? 'en' : appConfig.localization.locale;
+  const envLocale = isTestEnv ? 'en' : locale;
+  console.log({ envLocale })
 
   return (
     <ConfigurationProvider value={appConfig}>
-      <MomentLocaleLoader locale={locale}>
+      <MomentLocaleLoader locale={envLocale}>
         <RouteConfigurationProvider value={routeConfig}>{children}</RouteConfigurationProvider>
       </MomentLocaleLoader>
     </ConfigurationProvider>
@@ -210,6 +224,8 @@ const EnvironmentVariableWarning = props => {
 export const ClientApp = props => {
   const { store, hostedTranslations = {}, hostedConfig = {} } = props;
   const appConfig = mergeConfig(hostedConfig, defaultConfig);
+  console.log({ fullpathname: window.location.pathname })
+  const supportedLocale = getSupportedLocale(window.location.pathname, appConfig);
 
   // Show warning on the localhost:3000, if the environment variable key contains "SECRET"
   if (appSettings.dev) {
@@ -229,11 +245,14 @@ export const ClientApp = props => {
   if (!appConfig.hasMandatoryConfigurations) {
     return (
       <MaintenanceModeError
-        locale={appConfig.localization.locale}
-        messages={{ ...localeMessages, ...hostedTranslations }}
+        locale={supportedLocale}
+        messages={{ ...localeMessages(supportedLocale), ...hostedTranslations }}
       />
     );
   }
+
+  moment.locale(supportedLocale)
+  console.log('moment locale', moment.locale(), 'supportedLocale', supportedLocale)
 
   // Marketplace color and branding image comes from configs
   // If set, we need to create CSS Property and set it to DOM (documentElement is selected here)
@@ -249,10 +268,10 @@ export const ClientApp = props => {
   const logLoadDataCalls = appSettings?.env !== 'test';
 
   return (
-    <Configurations appConfig={appConfig}>
+    <Configurations appConfig={appConfig} locale={supportedLocale} >
       <IntlProvider
-        locale={appConfig.localization.locale}
-        messages={{ ...localeMessages, ...hostedTranslations }}
+        locale={supportedLocale}
+        messages={{ ...hostedTranslations, ...localeMessages(supportedLocale) }}
         textComponent="span"
       >
         <Provider store={store}>
@@ -275,11 +294,14 @@ export const ServerApp = props => {
   const appConfig = mergeConfig(hostedConfig, defaultConfig);
   HelmetProvider.canUseDOM = false;
 
+  const supportedLocale = getSupportedLocale(url, appConfig)
+  console.log({ supportedLocale })
+
   // Show MaintenanceMode if the mandatory configurations are not available
   if (!appConfig.hasMandatoryConfigurations) {
     return (
       <MaintenanceModeError
-        locale={appConfig.localization.locale}
+        locale={supportedLocale}
         messages={{ ...localeMessages, ...hostedTranslations }}
         helmetContext={helmetContext}
       />
@@ -289,8 +311,8 @@ export const ServerApp = props => {
   return (
     <Configurations appConfig={appConfig}>
       <IntlProvider
-        locale={appConfig.localization.locale}
-        messages={{ ...localeMessages, ...hostedTranslations }}
+        locale={supportedLocale}
+        messages={{ ...localeMessages(supportedLocale) }}
         textComponent="span"
       >
         <Provider store={store}>
@@ -350,3 +372,10 @@ export const renderApp = (
   const { helmet: head } = helmetContext;
   return { head, body };
 };
+
+
+export const getSupportedLocale = (path, appConfig) => {
+  const [_, pathLocale, ...rest] = path.split('/');
+  const isSupportedPathLocale = Object.keys(messagesInLocale).includes(pathLocale);
+  return isSupportedPathLocale ? pathLocale : appConfig.localization.locale;
+}
