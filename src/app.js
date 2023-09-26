@@ -72,9 +72,13 @@ import 'moment/locale/es';
 //   3. en.json
 //
 // I.e. remove "const messagesInLocale" and add import for the correct locale:
+
+
 // TODO use Loadable
 import messagesFr from './translations/fr.json';
 import messagesEs from './translations/es.json';
+// This object determines which locales are supported as the :locale param the URL route
+// 'domain/:locale/rest-of-url', e.g. localhost:3000/fr/s is supported but localhost:3000/dk/s is not
 const messagesInLocale = {
   es: messagesEs,
   fr: messagesFr,
@@ -248,7 +252,6 @@ export const ClientApp = props => {
   }
 
   moment.locale(supportedLocale)
-  console.log('moment locale', moment.locale(), 'supportedLocale', supportedLocale)
 
   // Marketplace color and branding image comes from configs
   // If set, we need to create CSS Property and set it to DOM (documentElement is selected here)
@@ -263,6 +266,9 @@ export const ClientApp = props => {
   // This gives good input for debugging issues on live environments, but with test it's not needed.
   const logLoadDataCalls = appSettings?.env !== 'test';
 
+  // This uses locally loaded messages by default, so that if the same key exists in hosted translation
+  // and local translation, the local is preferred. This makes it possible to use multiple locally
+  // loaded translation files per locale.
   return (
     <Configurations appConfig={appConfig} locale={supportedLocale} >
       <IntlProvider
@@ -368,7 +374,8 @@ export const renderApp = (
   return { head, body };
 };
 
-
+// This function checks whether the path locale is among the supported locales. If not,
+// it returns the default localization from app config.
 export const getSupportedLocale = (path, appConfig) => {
   const [_, pathLocale, ...rest] = path.split('/');
   const isSupportedPathLocale = Object.keys(messagesInLocale).includes(pathLocale);
