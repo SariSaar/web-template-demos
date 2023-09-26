@@ -211,8 +211,6 @@ export const ClientApp = props => {
     );
   }
 
-  moment.locale(supportedLocale)
-
   // Marketplace color and branding image comes from configs
   // If set, we need to create CSS Property and set it to DOM (documentElement is selected here)
   // This provides marketplace color for everything under <html> tag (including modals/portals)
