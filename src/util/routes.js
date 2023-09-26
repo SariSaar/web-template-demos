@@ -22,7 +22,6 @@ const toPathByRouteName = (nameToFind, routes) => {
  * Shorthand for single path call. (```pathByRouteName('ListingPage', routes, { id: uuidX });```)
  */
 export const pathByRouteName = (nameToFind, routes, params = {}) => {
-  console.log({ nameToFind }, { routes }, { params })
   const hasEmptySlug = params && params.hasOwnProperty('slug') && params.slug === '';
   const pathParams = hasEmptySlug ? { ...params, slug: 'no-slug' } : params;
   return toPathByRouteName(nameToFind, routes)(pathParams);
@@ -116,7 +115,6 @@ export const canonicalRoutePath = (routes, location, pathOnly = false) => {
     // Remove possible trailing slash
     const cleanedPathName = pathname.replace(/\/$/, '');
     const parts = cleanedPathName.split('/');
-    console.log({ parts })
 
     if (parts.length !== 5) {
       throw new Error('Expected ListingPage route to have 5 parts');

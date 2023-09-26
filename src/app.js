@@ -110,7 +110,6 @@ const addMissingTranslations = (sourceLangTranslations, targetLangTranslations) 
 //       { 'My.translationKey1': 'My.translationKey1', 'My.translationKey2': 'My.translationKey2' }
 const isTestEnv = process.env.NODE_ENV === 'test';
 const localeMessages = (locale = 'en') => {
-  console.log({ localemessages: messagesInLocale[locale] })
   return isTestEnv
   ? mapValues(defaultMessages, (val, key) => key)
   : addMissingTranslations(defaultMessages, messagesInLocale[locale]);
@@ -121,7 +120,6 @@ const localeMessages = (locale = 'en') => {
 // just remove this and directly import the necessary locale on step 2.
 const MomentLocaleLoader = props => {
   const { children, locale } = props;
-  console.log({ messagesInLocale }, { locale })
   const isAlreadyImportedLocale =
     typeof hardCodedLocale !== 'undefined' && locale === hardCodedLocale;
 
@@ -162,7 +160,6 @@ const Configurations = props => {
   const { appConfig, locale, children } = props;
   const routeConfig = routeConfiguration(appConfig.layout);
   const envLocale = isTestEnv ? 'en' : locale;
-  console.log({ envLocale })
 
   return (
     <ConfigurationProvider value={appConfig}>
@@ -224,7 +221,6 @@ const EnvironmentVariableWarning = props => {
 export const ClientApp = props => {
   const { store, hostedTranslations = {}, hostedConfig = {} } = props;
   const appConfig = mergeConfig(hostedConfig, defaultConfig);
-  console.log({ fullpathname: window.location.pathname })
   const supportedLocale = getSupportedLocale(window.location.pathname, appConfig);
 
   // Show warning on the localhost:3000, if the environment variable key contains "SECRET"
@@ -295,7 +291,6 @@ export const ServerApp = props => {
   HelmetProvider.canUseDOM = false;
 
   const supportedLocale = getSupportedLocale(url, appConfig)
-  console.log({ supportedLocale })
 
   // Show MaintenanceMode if the mandatory configurations are not available
   if (!appConfig.hasMandatoryConfigurations) {
