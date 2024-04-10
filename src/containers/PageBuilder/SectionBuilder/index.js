@@ -7,10 +7,18 @@ import SectionArticle from './SectionArticle';
 import SectionFeatures from './SectionFeatures';
 import SectionCarousel from './SectionCarousel';
 import SectionHero from './SectionHero';
+import SectionRecommendedListings from './SectionRecommendedListings';
 
 // Main component: SectionBuilder
 import SectionBuilder from './SectionBuilder';
 
-export { SectionContainer, SectionColumns, SectionArticle, SectionFeatures, SectionCarousel };
+export {
+  SectionContainer,
+  SectionColumns,
+  SectionArticle,
+  SectionFeatures,
+  SectionCarousel,
+  SectionRecommendedListings,
+};
 
 export default SectionBuilder;
