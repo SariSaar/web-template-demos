@@ -12,16 +12,17 @@ import FallbackPage from './FallbackPage';
 import { ASSET_NAME, recommendedSectionId } from './LandingPage.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 
-import { SectionRecommendedListings } from '../PageBuilder/SectionBuilder';
+import { SectionRecommendedListings, SectionCurrentUser } from '../PageBuilder/SectionBuilder';
 
 const PageBuilder = loadable(() =>
   import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
 );
 
 const recommendedSectionType = 'recommended';
+const userSectionType = 'user';
 
 export const LandingPageComponent = props => {
-  const { pageAssetsData, listings, inProgress, error } = props;
+  const { pageAssetsData, listings, inProgress, error, currentUser } = props;
 
   // Construct custom page data
   const pageData = pageAssetsData?.[camelize(ASSET_NAME)]?.data;
@@ -37,12 +38,24 @@ export const LandingPageComponent = props => {
     listings: listings,
   };
 
+  const customCurrentUserSection = {
+    sectionType: userSectionType,
+    currentUser,
+  };
+
+  const customSections = pageData
+    ? [
+        customCurrentUserSection,
+        ...pageData?.sections?.map((s, idx) =>
+          idx === recommendedSectionIdx ? customRecommendedSection : s
+        ),
+      ]
+    : null;
+
   const customPageData = pageData
     ? {
         ...pageData,
-        sections: pageData.sections.map((s, idx) =>
-          idx === recommendedSectionIdx ? customRecommendedSection : s
-        ),
+        sections: customSections,
       }
     : pageData;
 
@@ -52,6 +65,7 @@ export const LandingPageComponent = props => {
       options={{
         sectionComponents: {
           [recommendedSectionType]: { component: SectionRecommendedListings },
+          [userSectionType]: { component: SectionCurrentUser },
         },
       }}
       inProgress={inProgress}
@@ -70,8 +84,9 @@ LandingPageComponent.propTypes = {
 const mapStateToProps = state => {
   const { pageAssetsData, inProgress, error } = state.hostedAssets || {};
   const { currentPageResultIds } = state.SearchPage;
+  const { currentUser } = state.user;
   const listings = getListingsById(state, currentPageResultIds);
-  return { pageAssetsData, listings, inProgress, error };
+  return { pageAssetsData, listings, inProgress, error, currentUser };
 };
 
 // Note: it is important that the withRouter HOC is **outside** the

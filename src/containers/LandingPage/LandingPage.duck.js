@@ -16,18 +16,7 @@ const getListingParams = (config, listingIds) => {
   return {
     ids: listingIds,
     include: ['author', 'images'],
-    'fields.listing': [
-      'title',
-      'geolocation',
-      'price',
-      'publicData.listingType',
-      'publicData.transactionProcessAlias',
-      'publicData.unitType',
-      // These help rendering of 'purchase' listings,
-      // when transitioning from search page to listing page
-      'publicData.pickupEnabled',
-      'publicData.shippingEnabled',
-    ],
+    'fields.listing': ['title', 'price', 'publicData.transactionProcessAlias'],
     'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
     'fields.image': [
       'variants.scaled-small',
@@ -53,7 +42,6 @@ export const loadData = (params, search, config) => dispatch => {
     if (customSection) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
       const listingParams = getListingParams(config, recommendedListingIds);
-      console.log('has custom section, dispatching now!');
       dispatch(searchListings(listingParams, config));
     }
   });

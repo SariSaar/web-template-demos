@@ -1,5 +1,6 @@
 import React from 'react';
 import { func, node, shape, string } from 'prop-types';
+import { useIntl } from '../../../../util/reactIntl';
 
 import Field, { hasDataInFields } from '../../Field';
 
@@ -14,19 +15,35 @@ const SectionCurrentUser = props => {
   if (!currentUser) {
     return null;
   }
+  const intl = useIntl();
 
   // If external mapping has been included for fields
   // E.g. { h1: { component: MyAwesomeHeader } }
   const fieldComponents = options?.fieldComponents;
   const fieldOptions = { fieldComponents };
 
+  const titleContent = intl.formatMessage(
+    { id: 'LandingPageSectionCurrentUser.title' },
+    { firstName: currentUser.attributes.profile.firstName }
+  );
+  const callToActionContent = intl.formatMessage({
+    id: 'LandingPageSectionCurrentUser.callToAction',
+  });
+
   const title = {
     fieldType: 'heading2',
     content: `Welcome, ${currentUser.attributes.profile.firstName}!`,
+    // content: intl.formatMessage(
+    //   { id: 'LandingPageSectionCurrentUser.title' },
+    //   { firstName: currentUser.attributes.profile.firstName }
+    // ),
   };
 
   const callToAction = {
     content: 'View your public user profile',
+    // content: intl.formatMessage({
+    //   id: 'LandingPageSectionCurrentUser.callToAction',
+    // }),
     fieldType: 'internalButtonLink',
     href: `/u/${currentUser.id.uuid}`,
   };
@@ -50,15 +67,7 @@ const propTypeOption = shape({
 });
 
 SectionCurrentUser.defaultProps = {
-  className: null,
-  rootClassName: null,
   defaultClasses: null,
-  textClassName: null,
-  title: null,
-  appearance: null,
-  callToAction: null,
-  blocks: [],
-  isInsideContainer: false,
   options: null,
   currentUser: null,
 };
