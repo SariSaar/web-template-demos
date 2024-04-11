@@ -53,7 +53,7 @@ export const loadData = (params, search, config) => dispatch => {
     if (customSection) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
       const listingParams = getListingParams(config, recommendedListingIds);
-      console.log('has custom section, dispatching now!')
+      console.log('has custom section, dispatching now!');
       dispatch(searchListings(listingParams, config));
     }
   });

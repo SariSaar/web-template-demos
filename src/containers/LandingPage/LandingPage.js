@@ -22,10 +22,12 @@ const recommendedSectionType = 'recommended';
 
 export const LandingPageComponent = props => {
   const { pageAssetsData, listings, inProgress, error } = props;
-  
+
   // Construct custom page data
   const pageData = pageAssetsData?.[camelize(ASSET_NAME)]?.data;
-  const recommendedSectionIdx = pageData?.sections.findIndex(s => s.sectionId === recommendedSectionId);
+  const recommendedSectionIdx = pageData?.sections.findIndex(
+    s => s.sectionId === recommendedSectionId
+  );
   const recommendedSection = pageData?.sections[recommendedSectionIdx];
 
   const customRecommendedSection = {

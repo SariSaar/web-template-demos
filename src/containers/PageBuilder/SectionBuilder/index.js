@@ -8,6 +8,7 @@ import SectionFeatures from './SectionFeatures';
 import SectionCarousel from './SectionCarousel';
 import SectionHero from './SectionHero';
 import SectionRecommendedListings from './SectionRecommendedListings';
+import SectionCurrentUser from './SectionCurrentUser';
 
 // Main component: SectionBuilder
 import SectionBuilder from './SectionBuilder';
@@ -19,6 +20,7 @@ export {
   SectionFeatures,
   SectionCarousel,
   SectionRecommendedListings,
+  SectionCurrentUser,
 };
 
 export default SectionBuilder;
