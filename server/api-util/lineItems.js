@@ -72,6 +72,16 @@ const getHourQuantityAndLineItems = orderData => {
   return { quantity, extraLineItems: [] };
 };
 
+const getHourUnitsSeatsAndLineItems = orderData => {
+  const { bookingStart, bookingEnd, seats } = orderData || {};
+  const units =
+    bookingStart && bookingEnd
+      ? calculateQuantityFromHours(bookingStart, bookingEnd)
+      : null;
+
+  return { units, seats, extraLineItems: [] };
+};
+
 /**
  * Calculate quantity based on days or nights between given bookingDates.
  *
@@ -140,16 +150,18 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const quantityAndExtraLineItems =
     unitType === 'item'
       ? getItemQuantityAndLineItems(orderData, publicData, currency)
+      : unitType === 'hour' && !!orderData.seats
+      ? getHourUnitsSeatsAndLineItems(orderData)
       : unitType === 'hour'
       ? getHourQuantityAndLineItems(orderData)
       : ['day', 'night'].includes(unitType)
       ? getDateRangeQuantityAndLineItems(orderData, code)
       : {};
 
-  const { quantity, extraLineItems } = quantityAndExtraLineItems;
+      const { quantity, units, seats, extraLineItems } = quantityAndExtraLineItems;
 
   // Throw error if there is no quantity information given
-  if (!quantity) {
+  if (!quantity && !(units && seats)) {
     const message = `Error: transition should contain quantity information: 
       stockReservationQuantity, quantity, or bookingStart & bookingEnd (if "line-item/day" or "line-item/night" is used)`;
     const error = new Error(message);
@@ -158,6 +170,8 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
     error.data = {};
     throw error;
   }
+
+  const quantityOrSeats = !!units && !!seats ? { units, seats } : { quantity };
 
   /**
    * If you want to use pre-defined component and translations for printing the lineItems base price for order,
@@ -172,7 +186,7 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const order = {
     code,
     unitPrice,
-    quantity,
+    ...quantityOrSeats,
     includeFor: ['customer', 'provider'],
   };
 

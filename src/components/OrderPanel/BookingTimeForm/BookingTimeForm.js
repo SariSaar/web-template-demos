@@ -33,7 +33,7 @@ export class BookingTimeFormComponent extends Component {
   // In case you add more fields to the form, make sure you add
   // the values here to the orderData object.
   handleOnChange(formValues) {
-    const { bookingStartTime, bookingEndTime } = formValues.values;
+    const { bookingStartTime, bookingEndTime, seats } = formValues.values;
     const startDate = bookingStartTime ? timestampToDate(bookingStartTime) : null;
     const endDate = bookingEndTime ? timestampToDate(bookingEndTime) : null;
 
@@ -51,7 +51,7 @@ export class BookingTimeFormComponent extends Component {
       !this.props.fetchLineItemsInProgress
     ) {
       this.props.onFetchTransactionLineItems({
-        orderData: { bookingStart: startDate, bookingEnd: endDate },
+        orderData: { bookingStart: startDate, bookingEnd: endDate, seats: parseInt(seats, 10) },
         listingId,
         isOwnListing,
       });
@@ -141,6 +141,7 @@ export class BookingTimeFormComponent extends Component {
                   pristine={pristine}
                   timeZone={timeZone}
                   dayCountAvailableForBooking={dayCountAvailableForBooking}
+                  seatsLabel="Seats!"
                 />
               ) : null}
 
