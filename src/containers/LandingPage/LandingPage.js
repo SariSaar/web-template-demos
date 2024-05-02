@@ -12,10 +12,9 @@ import FallbackPage from './FallbackPage';
 import { ASSET_NAME, recommendedSectionId } from './LandingPage.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 
-import { SectionRecommendedListings, SectionCurrentUser } from '../PageBuilder/SectionBuilder';
 
 const PageBuilder = loadable(() =>
-  import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
+import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
 );
 
 const recommendedSectionType = 'recommended';
@@ -64,8 +63,8 @@ export const LandingPageComponent = props => {
       pageAssetsData={customPageData}
       options={{
         sectionComponents: {
-          [recommendedSectionType]: { component: SectionRecommendedListings },
-          [userSectionType]: { component: SectionCurrentUser },
+          // [recommendedSectionType]: { component: SectionRecommendedListings },
+          // [userSectionType]: { component: SectionCurrentUser },
         },
       }}
       inProgress={inProgress}

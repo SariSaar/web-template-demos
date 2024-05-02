@@ -8,6 +8,8 @@ import SectionCarousel from './SectionCarousel';
 import SectionColumns from './SectionColumns';
 import SectionFeatures from './SectionFeatures';
 import SectionHero from './SectionHero';
+import SectionRecommendedListings from './SectionRecommendedListings';
+import SectionCurrentUser from './SectionCurrentUser';
 
 // Styles
 // Note: these contain
@@ -39,6 +41,8 @@ const defaultSectionComponents = {
   features: { component: SectionFeatures },
   footer: { component: SectionFooter },
   hero: { component: SectionHero },
+  recommended: { component: SectionRecommendedListings },
+  user: { component: SectionCurrentUser }
 };
 
 //////////////////////
