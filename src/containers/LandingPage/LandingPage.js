@@ -16,6 +16,10 @@ const PageBuilder = loadable(() =>
   import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
 );
 
+// const { SectionRecommendedListings, SectionCurrentUser } = loadable(() =>
+//   import(/* webpackChunkName: "SectionBuilder" */ '../PageBuilder/SectionBuilder')
+// );
+
 import { SectionRecommendedListings, SectionCurrentUser } from '../PageBuilder/SectionBuilder';
 
 const recommendedSectionType = 'recommended';

@@ -42,7 +42,7 @@ export const loadData = (params, search, config) => dispatch => {
     if (customSection) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
       const listingParams = getListingParams(config, recommendedListingIds);
-      dispatch(searchListings(listingParams, config));
+      // dispatch(searchListings(listingParams, config));
     }
   });
 };
