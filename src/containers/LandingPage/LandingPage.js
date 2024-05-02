@@ -12,11 +12,11 @@ import FallbackPage from './FallbackPage';
 import { ASSET_NAME, recommendedSectionId } from './LandingPage.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 
-import { SectionRecommendedListings, SectionCurrentUser } from '../PageBuilder/SectionBuilder';
-
 const PageBuilder = loadable(() =>
   import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
 );
+
+import { SectionRecommendedListings, SectionCurrentUser } from '../PageBuilder/SectionBuilder';
 
 const recommendedSectionType = 'recommended';
 const userSectionType = 'user';
