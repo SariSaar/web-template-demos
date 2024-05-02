@@ -12,9 +12,8 @@ import FallbackPage from './FallbackPage';
 import { ASSET_NAME, recommendedSectionId } from './LandingPage.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 
-
 const PageBuilder = loadable(() =>
-import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
+  import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
 );
 
 const recommendedSectionType = 'recommended';

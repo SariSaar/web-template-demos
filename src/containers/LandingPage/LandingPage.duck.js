@@ -13,7 +13,7 @@ export const FETCH_LISTINGS_ERROR = 'app/SearchPage/FETCH_LISTINGS_ERROR';
 
 // ================ Reducer ================ //
 const initialState = {
-  fetchInProgress: true,
+  fetchInProgress: false,
   currentPageResultIds: [],
   fetchListingsError: null,
 };
@@ -22,18 +22,21 @@ const landingPageReducer = (state = initialState, action = {}) => {
   const { type, payload } = action;
   switch (type) {
     case FETCH_LISTINGS_REQUEST:
+      console.log('FETCH_LISTINGS_REQUEST');
       return {
         ...state,
         fetchInProgress: true,
         fetchListingsError: null,
       };
-    case FETCH_LISTINGS_SUCCESS:
+      case FETCH_LISTINGS_SUCCESS:
+      console.log('FETCH_LISTINGS_SUCCESS')
       return {
         ...state,
         currentPageResultIds: resultIds(payload.data),
         fetchInProgress: false,
       };
-    case FETCH_LISTINGS_ERROR:
+      case FETCH_LISTINGS_ERROR:
+      console.log('FETCH_LISTINGS_ERROR');
       // eslint-disable-next-line no-console
       console.error(payload);
       return { ...state, fetchInProgress: false, fetchListingsError: payload };
@@ -49,9 +52,9 @@ const resultIds = data => data.data.map(l => l.id);
 
 // Action creators
 
-export const fetchListingsRequest = searchParams => ({
+export const fetchListingsRequest = () => ({
   type: FETCH_LISTINGS_REQUEST,
-  payload: { searchParams },
+  payload: {},
 });
 
 export const fetchListingsSuccess = response => ({
@@ -91,21 +94,30 @@ const getListingParams = (config, listingIds) => {
   };
 };
 
-const fetchRecommendedListings = (searchParams, config) => (dispatch, getState, sdk) => {
+export const fetchRecommendedListings = (searchParams, config) => (dispatch, getState, sdk) => {
+  const state = getState().LandingPage;
+  console.log({ state })
+  const { fetchInProgress } = state;
+
+  if (fetchInProgress) {
+    return;
+  }
+
   dispatch(fetchListingsRequest());
-  console.log('fetching listings')
+  console.log('fetching listings', { searchParams });
+  console.log('fetchRecommendedListings', { fetchInProgress })
 
   sdk.listings
     .query(searchParams)
     .then(response => {
-      console.log('has response')
+      console.log('has response');
       const listingFields = config?.listing?.listingFields;
       const sanitizeConfig = { listingFields };
 
       dispatch(addMarketplaceEntities(response, sanitizeConfig));
-      console.log('dispatched addmarketplaceentities')
+      console.log('dispatched addmarketplaceentities');
       dispatch(fetchListingsSuccess(response));
-      console.log('dispatched fetchlistingssuccess')
+      console.log('dispatched fetchlistingssuccess');
       return response;
     })
     .catch(e => {
@@ -114,23 +126,27 @@ const fetchRecommendedListings = (searchParams, config) => (dispatch, getState, 
     });
 };
 
-export const loadData = (params, search, config) => dispatch => {
+export const loadData = (params, search, config) => (dispatch, getState) => {
   const pageAsset = { landingPage: `content/pages/${ASSET_NAME}.json` };
+  const state = getState().LandingPage;
+  const { fetchInProgress } = state;
+  console.log('loadData', { fetchInProgress }, { state })
 
-  dispatch(fetchPageAssets(pageAsset, true)).then(assetResp => {
+  return dispatch(fetchPageAssets(pageAsset, true)).then(assetResp => {
     // Get listing ids from custom recommended listings section
     const customSection = assetResp.landingPage?.data?.sections.find(
       s => s.sectionId === recommendedSectionId
     );
 
-    if (customSection) {
+    console.log('loadData', { customSection }, { fetchInProgress })
+
+    if (customSection && !fetchInProgress) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
-      console.log({ recommendedListingIds })
+      console.log({ recommendedListingIds });
       const listingParams = getListingParams(config, recommendedListingIds);
-      console.log('has listing params')
+      console.log('has listing params');
       dispatch(fetchRecommendedListings(listingParams, config));
-    } else {
-      console.log('no custom section!')
     }
+
   });
 };

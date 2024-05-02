@@ -42,7 +42,7 @@ const defaultSectionComponents = {
   footer: { component: SectionFooter },
   hero: { component: SectionHero },
   recommended: { component: SectionRecommendedListings },
-  user: { component: SectionCurrentUser }
+  user: { component: SectionCurrentUser },
 };
 
 //////////////////////

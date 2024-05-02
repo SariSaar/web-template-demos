@@ -43,6 +43,7 @@ exports.loadData = function(requestUrl, sdk, appInfo) {
     return matchedRoutes.reduce((calls, match) => {
       const { route, params } = match;
       if (typeof route.loadData === 'function' && !route.auth) {
+        console.log('route', JSON.stringify(route, null, 2));
         calls.push(store.dispatch(route.loadData(params, query, config)));
       }
       return calls;
@@ -65,7 +66,9 @@ exports.loadData = function(requestUrl, sdk, appInfo) {
       // Rest of the assets are considered as hosted configs
       // This structure just gives possibilities to add initial config data
       hostedConfig = { ...hostedConfig, ...extractHostedConfig(rest) };
-      return Promise.all(dataLoadingCalls(hostedConfig));
+      const calls = dataLoadingCalls(hostedConfig);
+      console.log({ calls });
+      return Promise.all(calls);
     })
     .then(() => {
       return { preloadedState: store.getState(), translations, hostedConfig };
