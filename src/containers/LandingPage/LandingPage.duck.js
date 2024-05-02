@@ -93,15 +93,19 @@ const getListingParams = (config, listingIds) => {
 
 const fetchRecommendedListings = (searchParams, config) => (dispatch, getState, sdk) => {
   dispatch(fetchListingsRequest());
+  console.log('fetching listings')
 
   sdk.listings
     .query(searchParams)
     .then(response => {
+      console.log('has response')
       const listingFields = config?.listing?.listingFields;
       const sanitizeConfig = { listingFields };
 
       dispatch(addMarketplaceEntities(response, sanitizeConfig));
+      console.log('dispatched addmarketplaceentities')
       dispatch(fetchListingsSuccess(response));
+      console.log('dispatched fetchlistingssuccess')
       return response;
     })
     .catch(e => {
@@ -121,7 +125,9 @@ export const loadData = (params, search, config) => dispatch => {
 
     if (customSection) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
+      console.log({ recommendedListingIds })
       const listingParams = getListingParams(config, recommendedListingIds);
+      console.log('has listing params')
       dispatch(fetchRecommendedListings(listingParams, config));
     } else {
       console.log('no custom section!')
