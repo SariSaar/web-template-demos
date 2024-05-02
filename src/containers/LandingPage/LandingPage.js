@@ -87,7 +87,7 @@ LandingPageComponent.propTypes = {
 
 const mapStateToProps = state => {
   const { pageAssetsData, inProgress, error } = state.hostedAssets || {};
-  const { currentPageResultIds } = state.SearchPage;
+  const { currentPageResultIds } = state.LandingPage;
   const { currentUser } = state.user;
   const listings = getListingsById(state, currentPageResultIds);
   return { pageAssetsData, listings, inProgress, error, currentUser };
