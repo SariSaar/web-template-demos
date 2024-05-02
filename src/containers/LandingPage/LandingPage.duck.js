@@ -113,7 +113,7 @@ const fetchRecommendedListings = (searchParams, config) => (dispatch, getState, 
 export const loadData = (params, search, config) => dispatch => {
   const pageAsset = { landingPage: `content/pages/${ASSET_NAME}.json` };
 
-  return dispatch(fetchPageAssets(pageAsset, true)).then(assetResp => {
+  dispatch(fetchPageAssets(pageAsset, true)).then(assetResp => {
     // Get listing ids from custom recommended listings section
     const customSection = assetResp.landingPage?.data?.sections.find(
       s => s.sectionId === recommendedSectionId
@@ -123,6 +123,8 @@ export const loadData = (params, search, config) => dispatch => {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
       const listingParams = getListingParams(config, recommendedListingIds);
       dispatch(fetchRecommendedListings(listingParams, config));
+    } else {
+      console.log('no custom section!')
     }
   });
 };
