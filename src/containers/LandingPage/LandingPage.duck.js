@@ -4,7 +4,38 @@ import { createImageVariantConfig } from '../../util/sdkLoader';
 export const ASSET_NAME = 'landing-page';
 export const recommendedSectionId = 'recommended-listings';
 
-const getListingParams = (config, listingIds) => {
+// ================ Action types ================ //
+
+export const FETCH_ASSETS_SUCCESS = 'app/LandingPage/FETCH_ASSETS_SUCCESS';
+
+// ================ Reducer ================ //
+
+const initialState = {
+  recommendedListingIds: [],
+};
+
+export default function reducer(state = initialState, action = {}) {
+  const { type, payload } = action;
+  switch (type) {
+    case FETCH_ASSETS_SUCCESS:
+      return {
+        ...state,
+        recommendedListingIds: payload.ids,
+      };
+
+    default:
+      return state;
+  }
+}
+
+// ================ Action creators ================ //
+
+export const fetchAssetsSuccess = ids => ({
+  type: FETCH_ASSETS_SUCCESS,
+  payload: { ids },
+});
+
+export const getRecommendedListingParams = (config, listingIds) => {
   const {
     aspectWidth = 1,
     aspectHeight = 1,
@@ -30,7 +61,7 @@ const getListingParams = (config, listingIds) => {
   };
 };
 
-export const loadData = (params, search, config) => dispatch => {
+export const loadData = () => dispatch => {
   const pageAsset = { landingPage: `content/pages/${ASSET_NAME}.json` };
 
   return dispatch(fetchPageAssets(pageAsset, true)).then(assetResp => {
@@ -41,8 +72,7 @@ export const loadData = (params, search, config) => dispatch => {
 
     if (customSection) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
-      const listingParams = getListingParams(config, recommendedListingIds);
-      dispatch(searchListings(listingParams, config));
+      dispatch(fetchAssetsSuccess(recommendedListingIds));
     }
   });
 };
