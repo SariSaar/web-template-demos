@@ -7,6 +7,7 @@ export const recommendedSectionId = 'recommended-listings';
 
 // ================ Action types ================ //
 
+export const FETCH_ASSETS_SUCCESS = 'app/LandingPage/FETCH_ASSETS_SUCCESS';
 export const FETCH_LISTINGS_REQUEST = 'app/LandingPage/FETCH_LISTINGS_REQUEST';
 export const FETCH_LISTINGS_SUCCESS = 'app/SearchPage/FETCH_LISTINGS_SUCCESS';
 export const FETCH_LISTINGS_ERROR = 'app/SearchPage/FETCH_LISTINGS_ERROR';
@@ -16,11 +17,18 @@ const initialState = {
   fetchInProgress: false,
   currentPageResultIds: [],
   fetchListingsError: null,
+  recommendedListingIds: [],
 };
 
 const landingPageReducer = (state = initialState, action = {}) => {
   const { type, payload } = action;
   switch (type) {
+    case FETCH_ASSETS_SUCCESS: 
+      console.log('FETCH_ASSETS_SUCCESS');
+      return {
+        ...state,
+        recommendedListingIds: payload,
+      }
     case FETCH_LISTINGS_REQUEST:
       console.log('FETCH_LISTINGS_REQUEST');
       return {
@@ -51,6 +59,11 @@ export default landingPageReducer;
 const resultIds = data => data.data.map(l => l.id);
 
 // Action creators
+
+export const fetchAssetsSuccess = ids => ({
+  type: FETCH_ASSETS_SUCCESS,
+  payload: ids,
+});
 
 export const fetchListingsRequest = () => ({
   type: FETCH_LISTINGS_REQUEST,
@@ -94,18 +107,11 @@ const getListingParams = (config, listingIds) => {
   };
 };
 
-export const fetchRecommendedListings = (searchParams, config) => (dispatch, getState, sdk) => {
-  const state = getState().LandingPage;
-  console.log({ state })
-  const { fetchInProgress } = state;
-
-  if (fetchInProgress) {
-    return;
-  }
-
+export const fetchRecommendedListings = (config, ids) => (dispatch, getState, sdk) => {
   dispatch(fetchListingsRequest());
+
+  const searchParams = getListingParams(config, ids)
   console.log('fetching listings', { searchParams });
-  console.log('fetchRecommendedListings', { fetchInProgress })
 
   sdk.listings
     .query(searchParams)
@@ -143,10 +149,7 @@ export const loadData = (params, search, config) => (dispatch, getState) => {
     if (customSection && !fetchInProgress) {
       const recommendedListingIds = customSection?.blocks.map(b => b.blockName);
       console.log({ recommendedListingIds });
-      const listingParams = getListingParams(config, recommendedListingIds);
-      console.log('has listing params');
-      dispatch(fetchRecommendedListings(listingParams, config));
+      dispatch(fetchAssetsSuccess(recommendedListingIds))
     }
-
   });
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import loadable from '@loadable/component';
 
 import { bool, object } from 'prop-types';
@@ -9,8 +9,9 @@ import { camelize } from '../../util/string';
 import { propTypes } from '../../util/types';
 
 import FallbackPage from './FallbackPage';
-import { ASSET_NAME, recommendedSectionId } from './LandingPage.duck';
+import { ASSET_NAME, fetchRecommendedListings, recommendedSectionId } from './LandingPage.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
+import { useConfiguration } from '../../context/configurationContext';
 
 const PageBuilder = loadable(() =>
   import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
@@ -20,7 +21,14 @@ const recommendedSectionType = 'recommended';
 const userSectionType = 'user';
 
 export const LandingPageComponent = props => {
-  const { pageAssetsData, listings, inProgress, error, currentUser } = props;
+  const { pageAssetsData, listings, inProgress, error, currentUser, recommendedListingIds, onFetchRecommendedListings } = props;
+  const config = useConfiguration();
+  
+  useEffect(() => {
+    if (recommendedListingIds) {
+      onFetchRecommendedListings(config, recommendedListingIds)
+    }
+  },[recommendedListingIds]);
 
   // Construct custom page data
   const pageData = pageAssetsData?.[camelize(ASSET_NAME)]?.data;
@@ -81,11 +89,15 @@ LandingPageComponent.propTypes = {
 
 const mapStateToProps = state => {
   const { pageAssetsData, inProgress, error } = state.hostedAssets || {};
-  const { currentPageResultIds } = state.LandingPage;
+  const { currentPageResultIds, recommendedListingIds } = state.LandingPage;
   const { currentUser } = state.user;
   const listings = getListingsById(state, currentPageResultIds);
-  return { pageAssetsData, listings, inProgress, error, currentUser };
+  return { pageAssetsData, listings, inProgress, error, currentUser, recommendedListingIds };
 };
+
+const mapDispatchToProps = dispatch => ({
+  onFetchRecommendedListings: (config, ids) => dispatch(fetchRecommendedListings(config, ids)),
+})
 
 // Note: it is important that the withRouter HOC is **outside** the
 // connect HOC, otherwise React Router won't rerender any Route
@@ -93,6 +105,6 @@ const mapStateToProps = state => {
 // lifecycle hook.
 //
 // See: https://github.com/ReactTraining/react-router/issues/4671
-const LandingPage = compose(connect(mapStateToProps))(LandingPageComponent);
+const LandingPage = compose(connect(mapStateToProps, mapDispatchToProps))(LandingPageComponent);
 
 export default LandingPage;
