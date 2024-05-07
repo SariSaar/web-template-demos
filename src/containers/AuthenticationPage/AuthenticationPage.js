@@ -92,6 +92,14 @@ export const SocialLoginButtonsMaybe = props => {
     window.location.href = `${baseUrl}/api/auth/google?${fromParam}${defaultReturnParam}${defaultConfirmParam}`;
   };
 
+  const authWithLinkedIn = () => {
+    const defaultRoutes = getDefaultRoutes();
+    const { baseUrl, fromParam, defaultReturnParam, defaultConfirmParam } = defaultRoutes;
+    window.location.href = `${baseUrl}/api/auth/linkedin?${fromParam}${defaultReturnParam}${defaultConfirmParam}`;
+  };
+
+  console.log({ showSocialLogins });
+
   return showSocialLogins ? (
     <div className={css.idpButtons}>
       <div className={css.socialButtonsOr}>
@@ -125,6 +133,17 @@ export const SocialLoginButtonsMaybe = props => {
           </SocialLoginButton>
         </div>
       ) : null}
+
+      <div className={css.socialButtonWrapper}>
+        <SocialLoginButton onClick={() => authWithLinkedIn()}>
+          <span className={css.buttonIcon}>LINKEDIN</span>
+          {isLogin ? (
+            <FormattedMessage id="AuthenticationPage.loginWithGoogle" />
+          ) : (
+            <FormattedMessage id="AuthenticationPage.signupWithGoogle" />
+          )}
+        </SocialLoginButton>
+      </div>
     </div>
   ) : null;
 };

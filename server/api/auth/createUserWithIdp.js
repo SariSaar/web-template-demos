@@ -11,9 +11,11 @@ const BASE_URL = process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL;
 
 const FACBOOK_APP_ID = process.env.REACT_APP_FACEBOOK_APP_ID;
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const LINKEDIN_CLIENT_ID = process.env.REACT_APP_LINKEDIN_CLIENT_ID;
 
 const FACEBOOK_IDP_ID = 'facebook';
 const GOOGLE_IDP_ID = 'google';
+const LINKEDIN_IDP_ID = 'linkedin';
 
 // Instantiate HTTP(S) Agents with keepAlive set to true.
 // This will reduce the request time for consecutive requests by
@@ -47,7 +49,18 @@ module.exports = (req, res) => {
 
   // Choose the idpClientId based on which authentication method is used.
   const idpClientId =
-    idpId === FACEBOOK_IDP_ID ? FACBOOK_APP_ID : idpId === GOOGLE_IDP_ID ? GOOGLE_CLIENT_ID : null;
+    idpId === FACEBOOK_IDP_ID
+      ? FACBOOK_APP_ID
+      : idpId === GOOGLE_IDP_ID
+      ? GOOGLE_CLIENT_ID
+      : idpId === LINKEDIN_IDP_ID
+      ? LINKEDIN_CLIENT_ID
+      : null;
+
+  console.log({ idpId });
+  console.log({ idpClientId });
+  console.log({ idpToken });
+  console.log({ rest });
 
   sdk.currentUser
     .createWithIdp({ idpId, idpClientId, idpToken, ...rest })

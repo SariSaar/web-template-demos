@@ -9591,6 +9591,12 @@ passport-google-oauth@^2.0.0:
     passport-google-oauth1 "1.x.x"
     passport-google-oauth20 "2.x.x"
 
+"passport-linkedin-oauth2@https://github.com/auth0/passport-linkedin-oauth2#v3.0.0":
+  version "3.0.0"
+  resolved "https://github.com/auth0/passport-linkedin-oauth2#8fe01d1c50124b25b6eaca3950151e6aceb800fe"
+  dependencies:
+    passport-oauth2 "1.x.x"
+
 passport-oauth1@1.x.x:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/passport-oauth1/-/passport-oauth1-1.1.0.tgz#a7de988a211f9cf4687377130ea74df32730c918"
