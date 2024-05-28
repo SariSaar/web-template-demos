@@ -263,11 +263,11 @@ export const listingFields = [
 
 export const listingTypes = [
   {
-    listingType: 'daily-booking',
-    label: 'Daily booking',
+    listingType: 'instant-booking',
+    label: 'Instant booking with push payment',
     transactionType: {
-      process: 'default-booking',
-      alias: 'default-booking/release-1',
+      process: 'instant-booking-poc',
+      alias: 'instant-booking-poc/release-1',
       unitType: 'day',
     },
     defaultListingFields: {

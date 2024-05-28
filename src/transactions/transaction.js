@@ -2,6 +2,7 @@ import * as log from '../util/log';
 import { ensureTransaction } from '../util/data';
 import * as purchaseProcess from './transactionProcessPurchase';
 import * as bookingProcess from './transactionProcessBooking';
+import * as instantBookingProcess from './transactionProcessInstantBooking';
 import * as inquiryProcess from './transactionProcessInquiry';
 
 // Supported unit types
@@ -17,6 +18,7 @@ export const INQUIRY = 'inquiry';
 export const PURCHASE_PROCESS_NAME = 'default-purchase';
 export const BOOKING_PROCESS_NAME = 'default-booking';
 export const INQUIRY_PROCESS_NAME = 'default-inquiry';
+export const INSTANT_BOOKING_PROCESS_NAME = 'instant-booking-poc';
 
 /**
  * A process should export:
@@ -43,6 +45,12 @@ const PROCESSES = [
     alias: `${BOOKING_PROCESS_NAME}/release-1`,
     process: bookingProcess,
     unitTypes: [DAY, NIGHT, HOUR],
+  },
+  {
+    name: INSTANT_BOOKING_PROCESS_NAME,
+    alias: `${INSTANT_BOOKING_PROCESS_NAME}/release-1`,
+    process: instantBookingProcess,
+    unitTypes: [DAY],
   },
   {
     name: INQUIRY_PROCESS_NAME,
@@ -291,7 +299,7 @@ export const isPurchaseProcessAlias = processAlias => {
 export const isBookingProcess = processName => {
   const latestProcessName = resolveLatestProcessName(processName);
   const processInfo = PROCESSES.find(process => process.name === latestProcessName);
-  return [BOOKING_PROCESS_NAME].includes(processInfo?.name);
+  return [BOOKING_PROCESS_NAME, INSTANT_BOOKING_PROCESS_NAME].includes(processInfo?.name);
 };
 
 /**
