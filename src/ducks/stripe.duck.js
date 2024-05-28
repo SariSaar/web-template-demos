@@ -258,8 +258,11 @@ export const confirmCardPayment = params => dispatch => {
     ? [stripePaymentIntentClientSecret, paymentParams]
     : [stripePaymentIntentClientSecret];
 
+  console.log({ args })
+
   const doConfirmCardPayment = () =>
-    stripe.confirmCardPayment(...args).then(response => {
+    // stripe.confirmCardPayment(...args).then(response => {
+    stripe.confirmIdealPayment(...args).then(response => {
       if (response.error) {
         return Promise.reject(response);
       } else {
