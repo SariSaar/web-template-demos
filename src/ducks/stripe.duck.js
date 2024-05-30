@@ -251,14 +251,21 @@ export const confirmCardPayment = params => dispatch => {
 
   dispatch(confirmCardPaymentRequest());
 
+  /*
+  * This causes the confirm to fail with an error message expecting return_url 
+  * to be an object, even though https://docs.stripe.com/js/payment_intents/confirm_ideal_payment
+  * specifies that return_url should be a string.
+  */
+  const return_url = window.location.href;
+
   // When using default payment method paymentParams.payment_method is
   // already set Marketplace API side, when request-payment transition is made
   // so there's no need for paymentParams
   const args = paymentParams
-    ? [stripePaymentIntentClientSecret, paymentParams]
-    : [stripePaymentIntentClientSecret];
+    ? [stripePaymentIntentClientSecret, paymentParams, return_url]
+    : [stripePaymentIntentClientSecret, return_url];
 
-  console.log({ args })
+  console.log({ args });
 
   const doConfirmCardPayment = () =>
     // stripe.confirmCardPayment(...args).then(response => {

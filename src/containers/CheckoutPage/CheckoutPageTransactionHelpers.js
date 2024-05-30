@@ -211,9 +211,10 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
 
     const requestTransition =
       storedTx?.attributes?.lastTransition === process.transitions.INQUIRE
-        ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
-        : process.transitions.REQUEST_PAYMENT;
+        ? process.transitions.REQUEST_PUSH_PAYMENT_AFTER_INQUIRY
+        : process.transitions.REQUEST_PUSH_PAYMENT;
     const isPrivileged = process.isPrivileged(requestTransition);
+    console.log({ requestTransition }, { isPrivileged });
 
     // If paymentIntent exists, order has been initiated previously.
     const orderPromise = hasPaymentIntents
@@ -255,7 +256,7 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
       ? {
           payment_method: {
             billing_details: billingDetails,
-            card: card,
+            ideal: card,
           },
         }
       : { payment_method: stripePaymentMethodId };

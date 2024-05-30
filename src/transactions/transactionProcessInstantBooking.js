@@ -193,9 +193,12 @@ export const isProviderReview = transition => {
 // should go through the local API endpoints, or if using JS SDK is
 // enough.
 export const isPrivileged = transition => {
-  return [transitions.REQUEST_PAYMENT, transitions.REQUEST_PAYMENT_AFTER_INQUIRY].includes(
-    transition
-  );
+  return [
+    transitions.REQUEST_PAYMENT,
+    transitions.REQUEST_PAYMENT_AFTER_INQUIRY,
+    transitions.REQUEST_PUSH_PAYMENT,
+    transitions.REQUEST_PUSH_PAYMENT_AFTER_INQUIRY,
+  ].includes(transition);
 };
 
 // Check when transaction is completed (booking over)

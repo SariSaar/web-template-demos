@@ -206,6 +206,7 @@ export const initiateOrder = (
     ...quantityMaybe,
     ...bookingParamsMaybe,
     ...otherOrderParams,
+    paymentMethodTypes: ['ideal'],
   };
 
   const bodyParams = isTransition
