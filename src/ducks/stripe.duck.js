@@ -262,8 +262,8 @@ export const confirmCardPayment = params => dispatch => {
   // already set Marketplace API side, when request-payment transition is made
   // so there's no need for paymentParams
   const args = paymentParams
-    ? [stripePaymentIntentClientSecret, paymentParams, return_url]
-    : [stripePaymentIntentClientSecret, return_url];
+    ? [stripePaymentIntentClientSecret,{ ...paymentParams, return_url }]
+    : [stripePaymentIntentClientSecret, {return_url}];
 
   console.log({ args });
 

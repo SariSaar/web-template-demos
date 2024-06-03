@@ -281,6 +281,7 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
   const fnConfirmPayment = fnParams => {
     // fnParams should contain { paymentIntent, transactionId } returned in step 2
     // Remember the created PaymentIntent for step 5
+    console.log('fnConfirmPayment', { fnParams })
     createdPaymentIntent = fnParams.paymentIntent;
     const transactionId = fnParams.transactionId;
     const transitionName = process.transitions.CONFIRM_PAYMENT;
