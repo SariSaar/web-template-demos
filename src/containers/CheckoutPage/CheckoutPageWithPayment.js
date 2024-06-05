@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { arrayOf, bool, func, object, oneOfType, shape, string } from 'prop-types';
 
 // Import contexts and util modules
@@ -6,7 +6,7 @@ import { FormattedMessage, intlShape } from '../../util/reactIntl';
 import { pathByRouteName } from '../../util/routes';
 import { propTypes, LINE_ITEM_HOUR, DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
 import { ensureTransaction } from '../../util/data';
-import { createSlug } from '../../util/urlHelpers';
+import { createSlug, parse } from '../../util/urlHelpers';
 import { isTransactionInitiateListingNotFoundError } from '../../util/errors';
 import { getProcess, isBookingProcessAlias } from '../../transactions/transaction';
 
@@ -34,6 +34,7 @@ import MobileListingImage from './MobileListingImage';
 import MobileOrderBreakdown from './MobileOrderBreakdown';
 
 import css from './CheckoutPage.module.css';
+import { useLocation } from 'react-router-dom/cjs/react-router-dom.min.js';
 
 // Stripe PaymentIntent statuses, where user actions are already completed
 // https://stripe.com/docs/payments/payment-intents/status
@@ -167,7 +168,15 @@ export const loadInitialDataForStripePayments = ({
   fetchSpeculatedTransactionIfNeeded(orderParams, pageData, fetchSpeculatedTransaction);
 };
 
-const handleSubmit = (values, process, props, stripe, submitting, setSubmitting) => {
+const handleSubmit = (
+  values,
+  process,
+  props,
+  stripe,
+  submitting,
+  setSubmitting,
+  isConfirm = false
+) => {
   if (submitting) {
     return;
   }
@@ -247,7 +256,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
   const orderParams = getOrderParams(pageData, shippingDetails, optionalPaymentParams, config);
 
   // There are multiple XHR calls that needs to be made against Stripe API and Sharetribe Marketplace API on checkout with payments
-  processCheckoutWithPayment(orderParams, requestPaymentParams)
+  processCheckoutWithPayment(orderParams, requestPaymentParams, isConfirm)
     .then(response => {
       const { orderId, messageSuccess, paymentMethodSaved } = response;
       setSubmitting(false);
@@ -296,6 +305,7 @@ export const CheckoutPageWithPayment = props => {
   const [submitting, setSubmitting] = useState(false);
   // Initialized stripe library is saved to state - if it's needed at some point here too.
   const [stripe, setStripe] = useState(null);
+  const location = useLocation();
 
   const {
     scrollingDisabled,
@@ -364,6 +374,22 @@ export const CheckoutPageWithPayment = props => {
   const process = processName ? getProcess(processName) : null;
   const transitions = process.transitions;
   const isPaymentExpired = hasPaymentExpired(existingTransaction, process, isClockInSync);
+
+  useEffect(() => {
+    const { search } = location;
+    const searchParams = parse(search);
+    console.log({ searchParams });
+
+    if (searchParams.redirect_status === 'succeeded') {
+      console.log('coming back from iDeal!');
+      // const { card, message, paymentMethod: selectedPaymentMethod, formValues } = values;
+      // const { saveAfterOnetimePayment: saveAfterOnetimePaymentRaw } = formValues;
+      const values = {
+        formValues: {},
+      };
+      handleSubmit(values, process, props, stripe, submitting, setSubmitting, true);
+    }
+  }, []);
 
   // Allow showing page when currentUser is still being downloaded,
   // but show payment form only when user info is loaded.

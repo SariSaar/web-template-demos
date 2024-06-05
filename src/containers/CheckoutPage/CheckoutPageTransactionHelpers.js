@@ -175,7 +175,7 @@ const persistTransaction = (order, pageData, storeData, setPageData, sessionStor
  * @param {Object} extraPaymentParams contains extra params needed by one of the following calls in the checkout sequence
  * @returns Promise that goes through each step in the checkout sequence.
  */
-export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
+export const processCheckoutWithPayment = (orderParams, extraPaymentParams, isConfirm = false) => {
   const {
     hasPaymentIntentUserActionsDone,
     isPaymentFlowUseSavedCard,
@@ -281,7 +281,6 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
   const fnConfirmPayment = fnParams => {
     // fnParams should contain { paymentIntent, transactionId } returned in step 2
     // Remember the created PaymentIntent for step 5
-    console.log('fnConfirmPayment', { fnParams })
     createdPaymentIntent = fnParams.paymentIntent;
     const transactionId = fnParams.transactionId;
     const transitionName = process.transitions.CONFIRM_PAYMENT;
@@ -336,6 +335,23 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
   //   .then(result => fnConfirmPayment({...result}))
   const applyAsync = (acc, val) => acc.then(val);
   const composeAsync = (...funcs) => x => funcs.reduce(applyAsync, Promise.resolve(x));
+
+  if (isConfirm) {
+    const { paymentIntent } = extraPaymentParams;
+    const handlePaymentIntentCreation = composeAsync(
+      fnConfirmPayment,
+      fnSendMessage,
+      fnSavePaymentMethod
+    );
+
+    const confirmParams = {
+      paymentIntent,
+      transactionId: storedTx.id,
+    };
+
+    return handlePaymentIntentCreation(confirmParams);
+  }
+
   const handlePaymentIntentCreation = composeAsync(
     fnRequestPayment,
     fnConfirmCardPayment,
