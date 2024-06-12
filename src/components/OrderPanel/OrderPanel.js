@@ -183,6 +183,7 @@ const OrderPanel = props => {
     fetchLineItemsInProgress,
     fetchLineItemsError,
     payoutDetailsWarning,
+    browserTimeZone
   } = props;
 
   const publicData = listing?.attributes?.publicData || {};
@@ -314,7 +315,7 @@ const OrderPanel = props => {
             onFetchTimeSlots={onFetchTimeSlots}
             startDatePlaceholder={intl.formatDate(TODAY, dateFormattingOptions)}
             endDatePlaceholder={intl.formatDate(TODAY, dateFormattingOptions)}
-            timeZone={timeZone}
+            timeZone={browserTimeZone}
             marketplaceName={marketplaceName}
             onFetchTransactionLineItems={onFetchTransactionLineItems}
             lineItems={lineItems}

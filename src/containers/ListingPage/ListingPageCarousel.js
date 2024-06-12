@@ -125,6 +125,8 @@ export const ListingPageComponent = props => {
       ? ensureOwnListing(getOwnListing(listingId))
       : ensureListing(getListing(listingId));
 
+  const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const listingSlug = rawParams.slug || createSlug(currentListing.attributes.title || '');
   const params = { slug: listingSlug, ...rawParams };
 
@@ -243,6 +245,7 @@ export const ListingPageComponent = props => {
     callSetInitialValues,
     getListing,
     onInitializeCardPaymentData,
+    browserTimeZone
   });
 
   const handleOrderSubmit = values => {
@@ -404,6 +407,7 @@ export const ListingPageComponent = props => {
               marketplaceCurrency={config.currency}
               dayCountAvailableForBooking={config.stripe.dayCountAvailableForBooking}
               marketplaceName={config.marketplaceName}
+              browserTimeZone={browserTimeZone}
             />
           </div>
         </div>

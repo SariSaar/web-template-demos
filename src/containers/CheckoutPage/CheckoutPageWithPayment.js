@@ -66,7 +66,7 @@ const paymentFlow = (selectedPaymentMethod, saveAfterOnetimePayment) => {
  * @param {Object} config app-wide configs. This contains hosted configs too.
  * @returns orderParams.
  */
-const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config) => {
+const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config, browserTimeZone = null) => {
   const quantity = pageData.orderData?.quantity;
   const quantityMaybe = quantity ? { quantity } : {};
   const deliveryMethod = pageData.orderData?.deliveryMethod;
@@ -78,6 +78,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
       ...getTransactionTypeData(listingType, unitType, config),
       ...deliveryMethodMaybe,
       ...shippingDetails,
+      customerTimeZone: browserTimeZone
     },
   };
 
@@ -167,7 +168,7 @@ export const loadInitialDataForStripePayments = ({
   fetchSpeculatedTransactionIfNeeded(orderParams, pageData, fetchSpeculatedTransaction);
 };
 
-const handleSubmit = (values, process, props, stripe, submitting, setSubmitting) => {
+const handleSubmit = (values, process, props, stripe, submitting, setSubmitting, browserTimeZone) => {
   if (submitting) {
     return;
   }
@@ -244,7 +245,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
 
   // These are the order parameters for the first payment-related transition
   // which is either initiate-transition or initiate-transition-after-enquiry
-  const orderParams = getOrderParams(pageData, shippingDetails, optionalPaymentParams, config);
+  const orderParams = getOrderParams(pageData, shippingDetails, optionalPaymentParams, config, browserTimeZone);
 
   // There are multiple XHR calls that needs to be made against Stripe API and Sharetribe Marketplace API on checkout with payments
   processCheckoutWithPayment(orderParams, requestPaymentParams)
@@ -317,6 +318,8 @@ export const CheckoutPageWithPayment = props => {
     config,
   } = props;
 
+  const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   // Since the listing data is already given from the ListingPage
   // and stored to handle refreshes, it might not have the possible
   // deleted or closed information in it. If the transaction
@@ -337,7 +340,7 @@ export const CheckoutPageWithPayment = props => {
     existingTransaction?.attributes?.lineItems?.length > 0
       ? existingTransaction
       : speculatedTransaction;
-  const timeZone = listing?.attributes?.availabilityPlan?.timezone;
+  const timeZone = browserTimeZone ||  listing?.attributes?.availabilityPlan?.timezone;
   const transactionProcessAlias = listing?.attributes?.publicData?.transactionProcessAlias;
   const unitType = listing?.attributes?.publicData?.unitType;
   const lineItemUnitType = `line-item/${unitType}`;
@@ -454,7 +457,7 @@ export const CheckoutPageWithPayment = props => {
               <StripePaymentForm
                 className={css.paymentForm}
                 onSubmit={values =>
-                  handleSubmit(values, process, props, stripe, submitting, setSubmitting)
+                  handleSubmit(values, process, props, stripe, submitting, setSubmitting, browserTimeZone)
                 }
                 inProgress={submitting}
                 formId="CheckoutPagePaymentForm"

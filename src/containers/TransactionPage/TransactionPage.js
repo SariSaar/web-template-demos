@@ -388,7 +388,8 @@ export const TransactionPageComponent = props => {
     ? formatLineItemUnitType(transaction, listing)
     : null;
 
-  const timeZone = listing?.attributes?.availabilityPlan?.timezone;
+    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timeZone =browserTimeZone || listing?.attributes?.availabilityPlan?.timezone;
   const dateType = lineItemUnitType === LINE_ITEM_HOUR ? DATE_TYPE_DATETIME : DATE_TYPE_DATE;
 
   const txBookingMaybe = booking?.id ? { booking, dateType, timeZone } : {};
