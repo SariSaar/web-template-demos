@@ -114,16 +114,17 @@ export const ListingPageComponent = props => {
     onInitializeCardPaymentData,
     config,
     routeConfiguration,
+    currentListingId,
   } = props;
 
   const listingConfig = config.listing;
-  const listingId = new UUID(rawParams.id);
+  const listingId = rawParams.id ? new UUID(rawParams.id) : currentListingId;
   const isPendingApprovalVariant = rawParams.variant === LISTING_PAGE_PENDING_APPROVAL_VARIANT;
   const isDraftVariant = rawParams.variant === LISTING_PAGE_DRAFT_VARIANT;
   const currentListing =
     isPendingApprovalVariant || isDraftVariant
-      ? ensureOwnListing(getOwnListing(listingId))
-      : ensureListing(getListing(listingId));
+      ? ensureOwnListing(getOwnListing(currentListingId))
+      : ensureListing(getListing(currentListingId));
 
   const listingSlug = rawParams.slug || createSlug(currentListing.attributes.title || '');
   const params = { slug: listingSlug, ...rawParams };
@@ -506,6 +507,7 @@ const mapStateToProps = state => {
   const { isAuthenticated } = state.auth;
   const {
     showListingError,
+    currentListingId,
     reviews,
     fetchReviewsError,
     monthlyTimeSlots,
@@ -546,6 +548,7 @@ const mapStateToProps = state => {
     fetchLineItemsError,
     sendInquiryInProgress,
     sendInquiryError,
+    currentListingId,
   };
 };
 

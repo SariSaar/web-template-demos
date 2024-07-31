@@ -83,6 +83,7 @@ export const ListingCardComponent = props => {
   const id = currentListing.id.uuid;
   const { title = '', price, publicData } = currentListing.attributes;
   const slug = createSlug(title);
+  const typeSlug = createSlug(publicData.listingType);
   const author = ensureUser(listing.author);
   const authorName = author.attributes.profile.displayName;
   const firstImage =
@@ -105,7 +106,7 @@ export const ListingCardComponent = props => {
     : null;
 
   return (
-    <NamedLink className={classes} name="ListingPage" params={{ id, slug }}>
+    <NamedLink className={classes} name="ListingPage" params={{ slug, typeSlug }}>
       <AspectRatioWrapper
         className={css.aspectRatioWrapper}
         width={aspectWidth}

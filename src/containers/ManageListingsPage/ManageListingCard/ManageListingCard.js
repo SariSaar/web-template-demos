@@ -70,6 +70,7 @@ const priceData = (price, currency, intl) => {
 const createListingURL = (routes, listing) => {
   const id = listing.id.uuid;
   const slug = createSlug(listing.attributes.title);
+  const typeSlug = createSlug(listing.attributes.publicData.listingType);
   const isPendingApproval = listing.attributes.state === LISTING_STATE_PENDING_APPROVAL;
   const isDraft = listing.attributes.state === LISTING_STATE_DRAFT;
   const variant = isDraft
@@ -89,8 +90,8 @@ const createListingURL = (routes, listing) => {
           },
         }
       : {
-          name: 'ListingPage',
-          params: { id, slug },
+          name: 'ListingPageOwn',
+          params: { id, slug, typeSlug },
         };
 
   return createResourceLocatorString(linkProps.name, routes, linkProps.params, {});

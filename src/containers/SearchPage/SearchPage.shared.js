@@ -428,9 +428,11 @@ export const createSearchResultSchema = (
 
   const schemaListings = listings.map((l, i) => {
     const title = l.attributes.title;
+    const { listingType } = l.attributes.publicData;
     const pathToItem = createResourceLocatorString('ListingPage', routeConfiguration, {
-      id: l.id.uuid,
+      // id: l.id.uuid,
       slug: createSlug(title),
+      typeSlug: createSlug(listingType),
     });
     return {
       '@type': 'ListItem',

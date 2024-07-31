@@ -39,6 +39,8 @@ export const SEND_INQUIRY_REQUEST = 'app/ListingPage/SEND_INQUIRY_REQUEST';
 export const SEND_INQUIRY_SUCCESS = 'app/ListingPage/SEND_INQUIRY_SUCCESS';
 export const SEND_INQUIRY_ERROR = 'app/ListingPage/SEND_INQUIRY_ERROR';
 
+export const SET_CURRENT_LISTING_ID = 'app/ListingPage/SET_CURRENT_LISTING_ID';
+
 // ================ Reducer ================ //
 
 const initialState = {
@@ -59,6 +61,7 @@ const initialState = {
   sendInquiryInProgress: false,
   sendInquiryError: null,
   inquiryModalOpenForListingId: null,
+  currentListingId: null,
 };
 
 const listingPageReducer = (state = initialState, action = {}) => {
@@ -129,6 +132,8 @@ const listingPageReducer = (state = initialState, action = {}) => {
     case SEND_INQUIRY_ERROR:
       return { ...state, sendInquiryInProgress: false, sendInquiryError: payload };
 
+    case SET_CURRENT_LISTING_ID:
+      return { ...state, currentListingId: payload };
     default:
       return state;
   }
@@ -191,9 +196,15 @@ export const sendInquiryRequest = () => ({ type: SEND_INQUIRY_REQUEST });
 export const sendInquirySuccess = () => ({ type: SEND_INQUIRY_SUCCESS });
 export const sendInquiryError = e => ({ type: SEND_INQUIRY_ERROR, error: true, payload: e });
 
+export const setCurrentListingId = id => ({ type: SET_CURRENT_LISTING_ID, payload: id });
+
 // ================ Thunks ================ //
 
-export const showListing = (listingId, config, isOwn = false) => (dispatch, getState, sdk) => {
+export const showListing = (listingId, config, slug, isOwn = false) => (
+  dispatch,
+  getState,
+  sdk
+) => {
   const {
     aspectWidth = 1,
     aspectHeight = 1,
@@ -204,7 +215,7 @@ export const showListing = (listingId, config, isOwn = false) => (dispatch, getS
   dispatch(showListingRequest(listingId));
   dispatch(fetchCurrentUser());
   const params = {
-    id: listingId,
+    // id: listingId,
     include: ['author', 'author.profileImage', 'images', 'currentStock'],
     'fields.image': [
       // Scaled variants for large images
@@ -233,7 +244,21 @@ export const showListing = (listingId, config, isOwn = false) => (dispatch, getS
     ...createImageVariantConfig(`${variantPrefix}-6x`, 2400, aspectRatio),
   };
 
-  const show = isOwn ? sdk.ownListings.show(params) : sdk.listings.show(params);
+  const idParams = {
+    id: listingId,
+    ...params,
+  };
+
+  const slugParams = {
+    keywords: slug.split('-'),
+    ...params,
+  };
+
+  const show = !listingId
+    ? sdk.listings.query(slugParams)
+    : isOwn
+    ? sdk.ownListings.show(idParams)
+    : sdk.listings.show(idParams);
 
   return show
     .then(data => {
@@ -375,21 +400,20 @@ export const fetchTransactionLineItems = ({ orderData, listingId, isOwnListing }
 };
 
 export const loadData = (params, search, config) => dispatch => {
-  const listingId = new UUID(params.id);
+  const listingId = params.id ? new UUID(params.id) : null;
+  const slug = params.slug;
 
   // Clear old line-items
   dispatch(setInitialValues({ lineItems: null }));
 
   const ownListingVariants = [LISTING_PAGE_DRAFT_VARIANT, LISTING_PAGE_PENDING_APPROVAL_VARIANT];
   if (ownListingVariants.includes(params.variant)) {
-    return dispatch(showListing(listingId, config, true));
+    return dispatch(showListing(listingId, config, slug, true));
   }
 
-  return Promise.all([
-    dispatch(showListing(listingId, config)),
-    dispatch(fetchReviews(listingId)),
-  ]).then(response => {
-    const listing = response[0].data.data;
+  return Promise.all([dispatch(showListing(listingId, config, slug))]).then(response => {
+    const listing = !!listingId ? response[0].data.data : response[0].data.data[0];
+    dispatch(setCurrentListingId(listing.id));
     const transactionProcessAlias = listing?.attributes?.publicData?.transactionProcessAlias || '';
     if (isBookingProcessAlias(transactionProcessAlias)) {
       // Fetch timeSlots.
@@ -397,6 +421,7 @@ export const loadData = (params, search, config) => dispatch => {
       // We are not interested to return them from loadData call.
       fetchMonthlyTimeSlots(dispatch, listing);
     }
+    dispatch(fetchReviews(listing.id.uuid));
     return response;
   });
 };
