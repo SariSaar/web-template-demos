@@ -14,12 +14,38 @@ way to update this template, but currently, we follow a pattern:
 
 ## Upcoming version 2024-XX-XX
 
-- [add] add currently available translations for de, es, fr.
+- [change] Update express.js (v4.19.2) and nodemon (3.1.4).
+  [#421](https://github.com/sharetribe/web-template/pull/421)
+- [add] richText.js: support parentheses on autolinked URLs.
+  [#419](https://github.com/sharetribe/web-template/pull/419)
+- [fix] Safari has a bug related to reading array directly from JSON-LD script tag.
+  [#418](https://github.com/sharetribe/web-template/pull/418)
+- [fix] There could be rare time-windows when indexing has not caught up with deleted & closed
+  listings. This might result those listings to be included to listing queries.
+  [#417](https://github.com/sharetribe/web-template/pull/417)
+
+## [v5.2.1] 2024-07-02
+
+- [fix] fix: calculateShippingFee (when shippingPriceInSubunitsAdditionalItems is 0, no shipping fee
+  was included) [#414](https://github.com/sharetribe/web-template/pull/414)
+- [fix] Remove stock from schema if there's no stock in use.
+  [#405](https://github.com/sharetribe/web-template/pull/405)
+- [fix] Remove left-behind slash from inquiry-new-inquiry email template reference.
+  [#406](https://github.com/sharetribe/web-template/pull/406)
+- [fix] The subject line of purchase-new-order email had a wrong variable name.
+  [#413](https://github.com/sharetribe/web-template/pull/413)
+- [change] Fix another typo in FR translations.
+  [#409](https://github.com/sharetribe/web-template/pull/409)
+- [change] Fix a typo in FR translations.
+  [#408](https://github.com/sharetribe/web-template/pull/408)
+- [add] Add currently available translations for de, es, fr.
   [#404](https://github.com/sharetribe/web-template/pull/404)
 - [fix] The example files of SignupForm and ConfirmSignupForm had wrong data.
   [#403](https://github.com/sharetribe/web-template/pull/403)
 - [change] FilterComponent: relax generated name-attribute for inputs: allow camelCase.
   [#402](https://github.com/sharetribe/web-template/pull/402)
+
+  [v5.2.1]: https://github.com/sharetribe/web-template/compare/v5.2.0...v5.2.1
 
 ## [v5.2.0] 2024-05-28
 
