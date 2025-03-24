@@ -61,7 +61,7 @@ import { FacebookLogo, GoogleLogo } from './socialLoginLogos';
 // Social login buttons are needed by AuthenticationForms
 export const SocialLoginButtonsMaybe = props => {
   const routeConfiguration = useRouteConfiguration();
-  const { isLogin, showFacebookLogin, showGoogleLogin, from, userType } = props;
+  const { isLogin, showFacebookLogin, showGoogleLogin, showGithubLogin, from, userType } = props;
   const showSocialLogins = showFacebookLogin || showGoogleLogin;
 
   const getDataForSSORoutes = () => {
@@ -94,6 +94,11 @@ export const SocialLoginButtonsMaybe = props => {
   const authWithGoogle = () => {
     const { baseUrl, queryParams } = getDataForSSORoutes();
     window.location.href = `${baseUrl}/api/auth/google?${queryParams}`;
+  };
+
+  const authWithGithub = () => {
+    const { baseUrl, queryParams } = getDataForSSORoutes();
+    window.location.href = `${baseUrl}/api/auth/github?${queryParams}`;
   };
 
   return showSocialLogins ? (
@@ -129,6 +134,19 @@ export const SocialLoginButtonsMaybe = props => {
           </SocialLoginButton>
         </div>
       ) : null}
+
+      {showGithubLogin ? (
+        <div className={css.socialButtonWrapper}>
+          <SocialLoginButton onClick={() => authWithGithub()}>
+            <span className={css.buttonIcon}>github</span>
+            {isLogin ? (
+              <FormattedMessage id="AuthenticationPage.loginWithGithub" />
+            ) : (
+              <FormattedMessage id="AuthenticationPage.signupWithGithub" />
+            )}
+          </SocialLoginButton>
+        </div>
+      ) : null}
     </div>
   ) : null;
 };
@@ -154,6 +172,7 @@ export const AuthenticationForms = props => {
     isLogin,
     showFacebookLogin,
     showGoogleLogin,
+    showGithubLogin,
     userType,
     from,
     submitLogin,
@@ -280,6 +299,7 @@ export const AuthenticationForms = props => {
         isLogin={isLogin}
         showFacebookLogin={showFacebookLogin}
         showGoogleLogin={showGoogleLogin}
+        showGithubLogin={showGithubLogin}
         {...fromMaybe}
         {...userTypeMaybe}
       />
@@ -397,6 +417,7 @@ export const AuthenticationOrConfirmInfoForm = props => {
     from,
     showFacebookLogin,
     showGoogleLogin,
+    showGithubLogin,
     submitLogin,
     submitSignup,
     submitSingupWithIdp,
@@ -424,6 +445,7 @@ export const AuthenticationOrConfirmInfoForm = props => {
       isLogin={isLogin}
       showFacebookLogin={showFacebookLogin}
       showGoogleLogin={showGoogleLogin}
+      showGithubLogin={showGithubLogin}
       userType={userType}
       from={from}
       loginError={loginError}
@@ -665,6 +687,7 @@ export const AuthenticationPageComponent = props => {
               from={from}
               showFacebookLogin={!!process.env.REACT_APP_FACEBOOK_APP_ID}
               showGoogleLogin={!!process.env.REACT_APP_GOOGLE_CLIENT_ID}
+              showGithubLogin={!!process.env.REACT_APP_GITHUB_CLIENT_ID}
               submitLogin={submitLogin}
               submitSignup={submitSignup}
               submitSingupWithIdp={submitSingupWithIdp}

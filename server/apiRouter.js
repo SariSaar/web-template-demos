@@ -20,6 +20,7 @@ const createUserWithIdp = require('./api/auth/createUserWithIdp');
 
 const { authenticateFacebook, authenticateFacebookCallback } = require('./api/auth/facebook');
 const { authenticateGoogle, authenticateGoogleCallback } = require('./api/auth/google');
+const { authenticateGithub, authenticateGithubCallback } = require('./api/auth/github');
 
 const router = express.Router();
 
@@ -79,5 +80,13 @@ router.get('/auth/google', authenticateGoogle);
 // with Google. In this route a Passport.js custom callback is used for calling
 // loginWithIdp endpoint in Sharetribe Auth API to authenticate user to the marketplace
 router.get('/auth/google/callback', authenticateGoogleCallback);
+
+// This endpoint is called when the user wants to initiate authentication with Github
+router.get('/auth/github', authenticateGithub);
+
+// This is the route for callback URL the user is redirected after authenticating
+// with Github. In this route a Passport.js custom callback is used for calling
+// loginWithIdp endpoint in Sharetribe API to authenticate user to Sharetribe
+router.get('/auth/github/callback', authenticateGithubCallback);
 
 module.exports = router;
