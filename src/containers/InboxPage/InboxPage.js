@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
@@ -16,6 +16,8 @@ import {
   STOCK_MULTIPLE_ITEMS,
   AVAILABILITY_MULTIPLE_SEATS,
   LINE_ITEM_FIXED,
+  SCHEMA_TYPE_MULTI_ENUM,
+  SCHEMA_TYPE_ENUM,
 } from '../../util/types';
 import { subtractTime } from '../../util/dates';
 import {
@@ -25,6 +27,7 @@ import {
   getProcess,
   isBookingProcess,
 } from '../../transactions/transaction';
+
 
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
@@ -48,6 +51,60 @@ import NotFoundPage from '../../containers/NotFoundPage/NotFoundPage';
 
 import { stateDataShape, getStateData } from './InboxPage.stateData';
 import css from './InboxPage.module.css';
+import { useHistory, useLocation } from 'react-router-dom/cjs/react-router-dom.min';
+import InboxFiltersComponent from './InboxFilters.js/InboxFilters';
+import { parse } from '../../util/urlHelpers';
+import { isArray } from 'lodash';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
+import { createResourceLocatorString } from '../../util/routes';
+
+const filters = [
+  {
+    key: 'hasStockReservation',
+    label: 'Transactions with stock reservation',
+    schemaType: SCHEMA_TYPE_ENUM,
+    options: [
+      { option: 'true', label: 'True' },
+      { option: 'false', label: 'False' }
+    ]
+  },
+  {
+    key: 'hasBooking',
+    label: 'Transactions with bookings',
+    schemaType: SCHEMA_TYPE_ENUM,
+    options: [
+      { option: 'true', label: 'True' },
+      { option: 'false', label: 'False' }
+    ]
+  },
+  {
+    key: 'hasPayin',
+    label: 'Transactions with a payment',
+    schemaType: SCHEMA_TYPE_ENUM,
+    options: [
+      { option: 'true', label: 'True' },
+      { option: 'false', label: 'False' }
+    ]
+  },
+  {
+    key: 'bookingDates',
+    label: 'Booking dates',
+    schemaType: 'dates',
+  },
+  {
+    key: 'bookingStates',
+    label: 'Booking states',
+    schemaType: SCHEMA_TYPE_MULTI_ENUM,
+    options: [
+      { option: 'pending', label: 'Pending' },
+      { option: 'proposed', label: 'Proposed' },
+      { option: 'accepted', label: 'Accepted' },
+      { option: 'declined', label: 'Declined' },
+      { option: 'cancelled', label: 'Cancelled' },
+    ],
+  },
+  ]
+;
 
 // Check if the transaction line-items use booking-related units
 const getUnitLineItem = lineItems => {
@@ -216,6 +273,8 @@ export const InboxItem = props => {
 export const InboxPageComponent = props => {
   const config = useConfiguration();
   const intl = useIntl();
+  const history = useHistory();
+  const routeConfiguration = useRouteConfiguration();
   const {
     currentUser,
     fetchInProgress,
@@ -227,9 +286,50 @@ export const InboxPageComponent = props => {
     transactions,
   } = props;
   const { tab } = params;
+  const location = useLocation();
+  const [currentFilters, setCurrentFilters] = useState();
   const validTab = tab === 'orders' || tab === 'sales';
   if (!validTab) {
     return <NotFoundPage staticContext={props.staticContext} />;
+  }
+
+  if (currentFilters !== location.search) {
+    console.log('search match')
+    setCurrentFilters(location.search);
+    console.log({ currentFilters }, { search: location.search })
+
+  }
+
+  const convertValuesToSearch = (values, dateParam) => {
+    return Object.keys(values).reduce((search, key, idx) => {
+      const paramValue = values[key];
+      console.log({ paramValue }, { idx }, { key })
+      if (isArray(paramValue)) {
+        return {
+          ...search,
+          [key] : paramValue.length > 0,
+        }
+      } else if (key === 'dates') {
+        console.log({ paramValue }, { dateParam })
+        return {
+          ...search,
+          [dateParam]: paramValue,
+        }
+      } else {        
+        return {
+          ...search,
+          [key] : paramValue,
+        }
+      }
+    }, {});
+  }
+
+  const updateFiltering = (values, dateParam) => {
+    console.log({ values }, { dateParam })
+    const search = convertValuesToSearch(values, dateParam);
+    console.log({ search })
+    history.push(createResourceLocatorString('InboxPage', routeConfiguration, {tab}, search))
+
   }
 
   const isOrders = tab === 'orders';
@@ -276,6 +376,15 @@ export const InboxPageComponent = props => {
       </li>
     ) : null;
   };
+
+  const toFilterComponent = f => (
+    <InboxFiltersComponent
+      config={f}
+      initialValues={parse(currentFilters)}
+      onHandleChangedValueFn={updateFiltering}
+      className={css.filter}
+    />
+  )
 
   const hasOrderOrSaleTransactions = (tx, isOrdersTab, user) => {
     return isOrdersTab
@@ -335,6 +444,10 @@ export const InboxPageComponent = props => {
         }
         footer={<FooterContainer />}
       >
+          <div className={css.filterRow}>
+            {filters.map(toFilterComponent)}
+
+          </div>
         {fetchOrdersOrSalesError ? (
           <p className={css.error}>
             <FormattedMessage id="InboxPage.fetchFailed" />

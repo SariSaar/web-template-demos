@@ -179,6 +179,8 @@ export class SearchPageComponent extends Component {
             location
           );
 
+          console.log({ search })
+
           history.push(
             createResourceLocatorString(routeName, routeConfiguration, pathParams, search)
           );

@@ -380,3 +380,14 @@
     color: var(--colorGrey300);
   }
 }
+
+.filterRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-bottom: 12px;
+}
+
+.filter {
+  padding-right: 12px;
+  padding-bottom: 12px;
+}

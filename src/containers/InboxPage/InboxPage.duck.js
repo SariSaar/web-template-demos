@@ -88,11 +88,14 @@ export const loadData = (params, search) => (dispatch, getState, sdk) => {
 
   dispatch(fetchOrdersOrSalesRequest());
 
-  const { page = 1 } = parse(search);
+  console.log({ search })
+  const { page = 1, ...rest } = parse(search);
+  console.log('loadData in InboxPage', { search }, { rest })
 
   const apiQueryParams = {
     only: onlyFilter,
     lastTransitions: getAllTransitionsForEveryProcess(),
+    ...rest,
     include: [
       'listing',
       'provider',
