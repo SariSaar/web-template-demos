@@ -415,6 +415,7 @@
   "FilterPlain.clear": "Clear",
   "ImageCarousel.imageAltText": "listing photo {index}/{count}",
   "ImageFromFile.couldNotReadFile": "Couldn't read file",
+  "InboxPage.clearFilters": "Clear all filters",
   "InboxPage.default-booking.accepted.status": "Accepted",
   "InboxPage.default-booking.canceled.status": "Canceled",
   "InboxPage.default-booking.declined.status": "Declined",

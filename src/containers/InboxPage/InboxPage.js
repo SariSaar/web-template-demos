@@ -28,7 +28,6 @@ import {
   isBookingProcess,
 } from '../../transactions/transaction';
 
-
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
 import {
@@ -43,6 +42,7 @@ import {
   TimeRange,
   UserDisplayName,
   LayoutSideNavigation,
+  Button,
 } from '../../components';
 
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
@@ -63,28 +63,19 @@ const filters = [
     key: 'hasStockReservation',
     label: 'Transactions with stock reservation',
     schemaType: SCHEMA_TYPE_ENUM,
-    options: [
-      { option: 'true', label: 'True' },
-      { option: 'false', label: 'False' }
-    ]
+    options: [{ option: 'true', label: 'True' }, { option: 'false', label: 'False' }],
   },
   {
     key: 'hasBooking',
     label: 'Transactions with bookings',
     schemaType: SCHEMA_TYPE_ENUM,
-    options: [
-      { option: 'true', label: 'True' },
-      { option: 'false', label: 'False' }
-    ]
+    options: [{ option: 'true', label: 'True' }, { option: 'false', label: 'False' }],
   },
   {
     key: 'hasPayin',
     label: 'Transactions with a payment',
     schemaType: SCHEMA_TYPE_ENUM,
-    options: [
-      { option: 'true', label: 'True' },
-      { option: 'false', label: 'False' }
-    ]
+    options: [{ option: 'true', label: 'True' }, { option: 'false', label: 'False' }],
   },
   {
     key: 'bookingDates',
@@ -103,9 +94,7 @@ const filters = [
       { option: 'cancelled', label: 'Cancelled' },
     ],
   },
-  ]
-;
-
+];
 // Check if the transaction line-items use booking-related units
 const getUnitLineItem = lineItems => {
   const unitLineItem = lineItems?.find(
@@ -294,43 +283,47 @@ export const InboxPageComponent = props => {
   }
 
   if (currentFilters !== location.search) {
-    console.log('search match')
     setCurrentFilters(location.search);
-    console.log({ currentFilters }, { search: location.search })
-
   }
 
   const convertValuesToSearch = (values, dateParam) => {
     return Object.keys(values).reduce((search, key, idx) => {
       const paramValue = values[key];
-      console.log({ paramValue }, { idx }, { key })
       if (isArray(paramValue)) {
         return {
           ...search,
-          [key] : paramValue.length > 0,
-        }
+          [key]: paramValue.length > 0,
+        };
       } else if (key === 'dates') {
-        console.log({ paramValue }, { dateParam })
         return {
           ...search,
           [dateParam]: paramValue,
-        }
-      } else {        
+        };
+      } else {
         return {
           ...search,
-          [key] : paramValue,
-        }
+          [key]: paramValue,
+        };
       }
     }, {});
-  }
+  };
 
   const updateFiltering = (values, dateParam) => {
-    console.log({ values }, { dateParam })
-    const search = convertValuesToSearch(values, dateParam);
-    console.log({ search })
-    history.push(createResourceLocatorString('InboxPage', routeConfiguration, {tab}, search))
+    const currentSearch = parse(currentFilters);
+    const newSearch = convertValuesToSearch(values, dateParam);
+    history.push(
+      createResourceLocatorString(
+        'InboxPage',
+        routeConfiguration,
+        { tab },
+        { ...currentSearch, ...newSearch }
+      )
+    );
+  };
 
-  }
+  const clearFiltering = () => {
+    history.push(createResourceLocatorString('InboxPage', routeConfiguration, { tab }, {}));
+  };
 
   const isOrders = tab === 'orders';
   const hasNoResults = !fetchInProgress && transactions.length === 0 && !fetchOrdersOrSalesError;
@@ -384,7 +377,7 @@ export const InboxPageComponent = props => {
       onHandleChangedValueFn={updateFiltering}
       className={css.filter}
     />
-  )
+  );
 
   const hasOrderOrSaleTransactions = (tx, isOrdersTab, user) => {
     return isOrdersTab
@@ -444,10 +437,12 @@ export const InboxPageComponent = props => {
         }
         footer={<FooterContainer />}
       >
-          <div className={css.filterRow}>
-            {filters.map(toFilterComponent)}
-
-          </div>
+        <div className={css.wholeFilter}>
+          <div className={css.filterRow}>{filters.map(toFilterComponent)}</div>
+          <button className={css.clearButton} onClick={clearFiltering}>
+            <FormattedMessage id={'InboxPage.clearFilters'} />
+          </button>
+        </div>
         {fetchOrdersOrSalesError ? (
           <p className={css.error}>
             <FormattedMessage id="InboxPage.fetchFailed" />

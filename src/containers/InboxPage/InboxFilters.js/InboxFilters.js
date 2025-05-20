@@ -5,16 +5,10 @@ import FilterForm from '../../SearchPage/FilterForm/FilterForm';
 import SelectMultipleFilter from '../../SearchPage/SelectMultipleFilter/SelectMultipleFilter';
 import SelectSingleFilter from '../../SearchPage/SelectSingleFilter/SelectSingleFilter';
 
-
-const InboxFiltersComponent  = props => {
-  const {
-    config,
-    onHandleChangedValueFn,
-    ...rest
-  } = props;
+const InboxFiltersComponent = props => {
+  const { config, onHandleChangedValueFn, ...rest } = props;
 
   const { key, schemaType, label } = config;
-
 
   switch (schemaType) {
     case SCHEMA_TYPE_ENUM: {
@@ -29,8 +23,8 @@ const InboxFiltersComponent  = props => {
           queryParamNames={[key]}
           {...rest}
         />
-      )
-    };
+      );
+    }
     case SCHEMA_TYPE_MULTI_ENUM: {
       const { options } = config;
       return (
@@ -44,34 +38,38 @@ const InboxFiltersComponent  = props => {
           queryParamNames={[key]}
           {...rest}
         />
-      )
-    };
+      );
+    }
     case 'dates': {
-      return (<div>
-        <BookingDateRangeFilter
-        label={`${label} start`}
-        key={'bookingStart'}
-        id={'bookingStart'}
-        name={'bookingStart'}
-        paramName={'bookingStart'}
-        onSubmit={values => onHandleChangedValueFn(values, 'bookingStart')}
-        liveEdit
-        />
-        <BookingDateRangeFilter
-        label={`${label} end`}
-        key={'bookingEnd'}
-        id={'bookingEnd'}
-        name={'bookingEnd'}
-        onSubmit={values => onHandleChangedValueFn(values, 'bookingEnd')}
-        liveEdit
-        />
+      return (
+        <div className={rest.className}>
+          <BookingDateRangeFilter
+            label={`${label} start`}
+            key={'bookingStart'}
+            id={'bookingStart'}
+            name={'bookingStart'}
+            queryParamNames={['bookingStart']}
+            onSubmit={values => onHandleChangedValueFn(values, 'bookingStart')}
+            liveEdit
+            {...rest}
+          />
+          <BookingDateRangeFilter
+            label={`${label} end`}
+            key={'bookingEnd'}
+            id={'bookingEnd'}
+            name={'bookingEnd'}
+            queryParamNames={['bookingEnd']}
+            onSubmit={values => onHandleChangedValueFn(values, 'bookingEnd')}
+            liveEdit
+            {...rest}
+          />
         </div>
-      )
+      );
     }
     default: {
       return null;
     }
   }
-}
+};
 
 export default InboxFiltersComponent;

@@ -4,6 +4,7 @@ import { storableError } from '../../util/errors';
 import { parse } from '../../util/urlHelpers';
 import { getAllTransitionsForEveryProcess } from '../../transactions/transaction';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
+import moment from 'moment';
 
 const sortedTransactions = txs =>
   reverse(
@@ -73,6 +74,20 @@ const fetchOrdersOrSalesError = e => ({
 
 const INBOX_PAGE_SIZE = 10;
 
+const parseDates = (dateParam, paramKey) => {
+  const [start, end] = dateParam.split(',');
+  const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+  const startString = moment(start)
+    .tz(timeZone)
+    .toISOString();
+  const endString = moment(end)
+    .tz(timeZone)
+    .toISOString();
+  return {
+    [paramKey]: `${startString},${endString}`,
+  };
+};
+
 export const loadData = (params, search) => (dispatch, getState, sdk) => {
   const { tab } = params;
 
@@ -88,13 +103,17 @@ export const loadData = (params, search) => (dispatch, getState, sdk) => {
 
   dispatch(fetchOrdersOrSalesRequest());
 
-  console.log({ search })
-  const { page = 1, ...rest } = parse(search);
-  console.log('loadData in InboxPage', { search }, { rest })
+  const { page = 1, bookingStart: bookingStartRaw, bookingEnd: bookingEndRaw, ...rest } = parse(
+    search
+  );
+  const bookingStartMaybe = bookingStartRaw ? parseDates(bookingStartRaw, 'bookingStart') : {};
+  const bookingEndMaybe = bookingEndRaw ? parseDates(bookingEndRaw, 'bookingEnd') : {};
 
   const apiQueryParams = {
     only: onlyFilter,
     lastTransitions: getAllTransitionsForEveryProcess(),
+    ...bookingStartMaybe,
+    ...bookingEndMaybe,
     ...rest,
     include: [
       'listing',

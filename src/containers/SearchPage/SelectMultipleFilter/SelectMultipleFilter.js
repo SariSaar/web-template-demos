@@ -113,7 +113,7 @@ const SelectMultipleFilter = props => {
   const namedInitialValues = { [name]: selectedOptions };
 
   const handleSubmit = values => {
-    console.log('inside selectmultiplefilter', { values })
+    console.log('inside selectmultiplefilter', { values });
     const usedValue = values ? values[name] : values;
     onSubmit(format(usedValue, queryParamName, schemaType, searchMode));
   };
